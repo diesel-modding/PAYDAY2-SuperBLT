@@ -7,6 +7,10 @@
 #include <algorithm>
 #include <openssl/evp.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 namespace pd2hook
 {
 	namespace Util
@@ -135,5 +139,18 @@ namespace pd2hook
 			return ss.str();
 		}
 
+		bool IsVr()
+		{
+			bool is_vr = false;
+
+#ifdef _WIN32
+			TCHAR processPath[MAX_PATH + 1];
+			GetModuleFileName(NULL, processPath, MAX_PATH + 1);
+			std::string processPathString = processPath;
+			is_vr = processPathString.rfind("_vr.exe") == processPathString.length() - 7;
+#endif
+
+			return is_vr;
+		}
 	}
 }

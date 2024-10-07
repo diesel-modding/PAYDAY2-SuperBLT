@@ -45,6 +45,8 @@ namespace pd2hook
 		template<typename T>
 		std::string ToHex(T num);
 
+		bool IsVr();
+
 		// See hashing.cpp
 		typedef std::string(*DirectoryHashFunction)(std::string);
 		typedef void(*HashResultReceiver)(lua_State* L, int ref, std::string filename, std::string result);

@@ -45,8 +45,8 @@ static_assert(sizeof(PDString) == 24 + sizeof(std::string), "PDString is the wro
 // The signature is the same for all try_open methods, so one typedef will work for all of them.
 typedef void(__thiscall* try_open_t)(void* this_, void* archive, blt::idstring type, blt::idstring name, int a, int b);
 
-static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive,
-                      blt::idstring type, blt::idstring name, int u1, int u2);
+static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, blt::idstring type,
+                      blt::idstring name, int u1, int u2);
 
 #define DECLARE_PASSTHROUGH_ARRAY(id)                                                                              \
 	static subhook::Hook hook_##id;                                                                                \
@@ -56,14 +56,15 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, type, name, u1, u2);           \
 	}
 
-// Four hooks for the other try_open functions: property_match_resolver, language_resolver, english_resolver and funcptr_resolver
+// Four hooks for the other try_open functions: property_match_resolver, language_resolver, english_resolver and
+// funcptr_resolver
 DECLARE_PASSTHROUGH_ARRAY(0)
 DECLARE_PASSTHROUGH_ARRAY(1)
 DECLARE_PASSTHROUGH_ARRAY(2)
 DECLARE_PASSTHROUGH_ARRAY(3)
 
-static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive,
-                      blt::idstring type, blt::idstring name, int u1, int u2)
+static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, blt::idstring type,
+                      blt::idstring name, int u1, int u2)
 {
 	// Try hooking this asset, and see if we need to handle it differently
 	BLTAbstractDataStore* datastore = nullptr;

@@ -21,45 +21,25 @@
 
 using blt::db::DieselDB;
 using blt::db::DslFile;
+using pd2hook::tweaker::dbhook::DBTargetFile;
 
 static const char* MODULE = "base/native/DB_001";
 
 static void wrenRegisterAssetHook(WrenVM* vm);
 static void wrenLoadAssetContents(WrenVM* vm);
 
-class DBTargetFile
+void DBTargetFile::clear_sources()
 {
-  public:
-	blt::idfile id;
+	plain_file.reset();
+	direct_bundle = blt::idfile();
+	replacer = nullptr;
 
-	/** If true, this asset will only be loaded if the default asset with this name/ext does not exist. */
-	bool fallback = false;
-
-	/** The path to the file to load and use for this asset */
-	std::optional<std::string> plain_file;
-
-	/** The ID of the in-bundle asset to use */
-	blt::idfile direct_bundle = blt::idfile();
-
-	/** The handle to a Wren object to run the loading callback on */
-	WrenHandle* wren_loader_obj = nullptr;
-
-	explicit DBTargetFile(blt::idfile id) : id(id)
+	if (wren_loader_obj)
 	{
+		wrenReleaseHandle(pd2hook::wren::get_wren_vm(), wren_loader_obj);
+		wren_loader_obj = nullptr;
 	}
-
-	void clear_sources()
-	{
-		plain_file.reset();
-		direct_bundle = blt::idfile();
-
-		if (wren_loader_obj)
-		{
-			wrenReleaseHandle(pd2hook::wren::get_wren_vm(), wren_loader_obj);
-			wren_loader_obj = nullptr;
-		}
-	}
-};
+}
 
 class DBForeignFile
 {
@@ -339,7 +319,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 	// TODO write to out_name somewhere
 
 	// Define these loading functions here, as we can use them either directly or after calling Wren
-	auto load_file = [&](const std::string& filename) {
+	auto load_file = [&](const std::string& filename)
+	{
 		BLTFileDataStore* ds = BLTFileDataStore::Open(filename);
 
 		if (!ds)
@@ -363,7 +344,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 		*out_len = ds->size();
 	};
 
-	auto load_bundle_item = [&](blt::idfile bundle_item) {
+	auto load_bundle_item = [&](blt::idfile bundle_item)
+	{
 		DslFile* file = DieselDB::Instance()->Find(bundle_item.name, bundle_item.ext);
 
 		// Abort if the file isn't found - most likely this would lead to a crash anyway since the PD2 version
@@ -397,15 +379,15 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 			*out_len = ds->size() - file->offset;
 	};
 
-	if (target.plain_file)
+	if (target.HasPlainFile())
 	{
 		load_file(target.plain_file.value());
 	}
-	else if (!target.direct_bundle.is_empty())
+	else if (target.HasDirectBundle())
 	{
 		load_bundle_item(target.direct_bundle);
 	}
-	else if (target.wren_loader_obj)
+	else if (target.HasWrenLoader())
 	{
 		auto lock = pd2hook::wren::lock_wren_vm();
 		WrenVM* vm = pd2hook::wren::get_wren_vm();
@@ -490,6 +472,22 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 #endif
 		}
 	}
+	else if (target.HasReplacer())
+	{
+		pd2hook::tweaker::dbhook::FileData* fd = new pd2hook::tweaker::dbhook::FileData{
+			nullptr,
+			0,
+			target.id.name,
+			target.id.ext,
+		};
+
+		target.replacer(fd);
+
+		auto* ds = new BLTStringDataStore(std::string((char*)fd->data, fd->size));
+
+		*out_datastore = ds;
+		*out_len = ds->size();
+	}
 	else
 	{
 		// File is disabled, use the regular version of the asset
@@ -497,6 +495,135 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 	}
 
 	return true;
+}
+
+// for native plugin stuff
+void pd2hook::tweaker::dbhook::register_asset_hook(blt::idstring name, blt::idstring ext, bool fallback,
+                                                   DBTargetFile** out_target)
+{
+	blt::idfile file(name, ext);
+
+	if (overriddenFiles.count(file))
+	{
+		char buff[1024];
+		memset(buff, 0, sizeof(buff));
+		snprintf(buff, sizeof(buff) - 1, "Duplicate asset registration for " IDPFP, name, ext);
+		PD2HOOK_LOG_WARN(buff);
+	}
+
+	auto entry = std::make_shared<DBTargetFile>(file);
+	overriddenFiles[file] = entry;
+	*out_target = entry.get();
+
+	char buff[1024];
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff) - 1, "Registerd asset hook for " IDPFP, name, ext);
+	PD2HOOK_LOG_LOG(buff);
+}
+
+bool pd2hook::tweaker::dbhook::file_exists(blt::idstring name, blt::idstring ext)
+{
+	DslFile* file = DieselDB::Instance()->Find(name, ext);
+
+	return file != nullptr;
+}
+
+pd2hook::tweaker::dbhook::FileData pd2hook::tweaker::dbhook::find_file(blt::idstring name, blt::idstring ext)
+{
+	DslFile* file = DieselDB::Instance()->Find(name, ext);
+
+	if (!file)
+	{
+		char buff[1024];
+		memset(buff, 0, sizeof(buff));
+		snprintf(buff, sizeof(buff) - 1, "Failed to find asset " IDPFP, name, ext);
+		PD2HOOK_LOG_ERROR(buff);
+
+#ifdef _WIN32
+		MessageBox(nullptr, "Failed to find asset - file not found. See log for more information.",
+		           "Native Plugin Error", MB_OK);
+		ExitProcess(1);
+#else
+		abort();
+#endif
+	}
+
+	std::ifstream stream(file->bundle->path, std::ios::binary);
+
+	if (stream.fail())
+	{
+		std::string message = "Failed to open bundle file containing the asset - " + file->bundle->path;
+		PD2HOOK_LOG_ERROR(message.c_str());
+
+#ifdef _WIN32
+		MessageBox(nullptr, "Failed to open bundle file containing the asset. See log for more information.",
+		           "Native Plugin Error", MB_OK);
+		ExitProcess(1);
+#else
+		abort();
+#endif
+	}
+
+	std::vector<uint8_t> data = file->ReadContents(stream);
+
+	uint8_t* outData = new uint8_t[data.size()];
+	memcpy(outData, data.data(), data.size());
+
+	stream.close();
+
+	pd2hook::tweaker::dbhook::FileData fd = {
+		outData,
+		data.size(),
+		name,
+		ext,
+	};
+
+	return fd;
+}
+
+//////////////////////////////////////
+//// DBTargetFile implementation /////
+//////////////////////////////////////
+
+void DBTargetFile::SetReplacer(db_file_replacer_t replacer)
+{
+	this->replacer = replacer;
+}
+void DBTargetFile::SetFallback(bool fallback)
+{
+	this->fallback = fallback;
+}
+
+void DBTargetFile::SetPlainFile(std::string path)
+{
+	clear_sources();
+	this->plain_file = path;
+}
+
+void DBTargetFile::SetDirectBundle(blt::idfile bundle)
+{
+	clear_sources();
+	this->direct_bundle = bundle;
+}
+
+bool DBTargetFile::HasReplacer()
+{
+	return this->replacer != nullptr;
+}
+
+bool DBTargetFile::HasPlainFile()
+{
+	return this->plain_file.has_value();
+}
+
+bool DBTargetFile::HasDirectBundle()
+{
+	return !this->direct_bundle.is_empty();
+}
+
+bool DBTargetFile::HasWrenLoader()
+{
+	return this->wren_loader_obj != nullptr;
 }
 
 //////////////////////////////////////

@@ -9,9 +9,7 @@
 #include <string.h>
 #include <string>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
+#include "util/util.h"
 
 // Hack to get the stack trace
 extern "C"
@@ -90,15 +88,7 @@ void get_mod_directory_at_depth(WrenVM* vm)
 
 void is_vr(WrenVM* vm)
 {
-	bool is_vr = false;
-
-#ifdef _WIN32
-	TCHAR processPath[MAX_PATH + 1];
-	GetModuleFileName(NULL, processPath, MAX_PATH + 1);
-	std::string processPathString = processPath;
-	is_vr = processPathString.rfind("_vr.exe") == processPathString.length() - 7;
-#endif
-
+	bool is_vr = pd2hook::Util::IsVr();
 	wrenSetSlotBool(vm, 0, is_vr);
 }
 
