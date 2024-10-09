@@ -9,17 +9,16 @@ This is the developer repository, and should only be used if you know what you'r
 The Lua component of the BLT which controls mod loading can be found in it's own repository, [payday2-superblt-lua](https://gitlab.com/znixian/payday2-superblt-lua).
 
 ## Download
-Visit [The SuperBLT Site](https://superblt.znix.xyz/) to get the latest stable download for Windows. 
-Dribbleondo maintains a Linux download that has compiled loaders for Debian-based distro's and Arch-based distro's, 
-which [can be downloaded from here](https://modworkshop.net/mod/36557). If your distro or Linux OS cannot run the precompiled loader, 
+Visit [The SuperBLT Site](https://superblt.znix.xyz/) to get the latest stable download for Windows.
+Dribbleondo maintains a Linux download that has compiled loaders for Debian-based distro's and Arch-based distro's,
+which [can be downloaded from here](https://modworkshop.net/mod/36557). If your distro or Linux OS cannot run the precompiled loader,
 see below for building GNU+Linux binaries for yourself.
 
 If you are on Linux, It is **strongly** advised that you **DO NOT** use the Flatpak version of Steam when running Payday 2 with SuperBLT enabled, as the Flatpak version of Steam imports various library dependencies that improves compatibility between OS's, while breaking the SuperBLT loader in the process. **You have been warned.**
 
 ## Documentation
-Documentation for the BLT can be found on the [GitHub Wiki](https://github.com/JamesWilko/Payday-2-BLT/wiki) for the project.
 
-Documentation for SuperBLT can be found on the [SuperBLT Website](https://superblt.znix.xyz).
+Documentation for all SuperBLT functions can be found on the [SuperBLT Website](https://superblt.znix.xyz).
 
 ## Development
 
