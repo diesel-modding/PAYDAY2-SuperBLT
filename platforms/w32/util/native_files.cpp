@@ -1,11 +1,11 @@
-//WINDOWS ONLY FILE!
-//Some other stuff might be aswell, but this is rather desperately windows only.
+// WINDOWS ONLY FILE!
+// Some other stuff might be aswell, but this is rather desperately windows only.
 
 #include "util/util.h"
 #include <Windows.h>
-#include <tchar.h>
 #include <stdio.h>
 #include <strsafe.h>
+#include <tchar.h>
 
 #include <fstream>
 #include <streambuf>
@@ -16,13 +16,15 @@ namespace pd2hook
 {
 	namespace Util
 	{
-		IOException::IOException(const char *file, int line) : Exception(file, line)
-		{}
+		IOException::IOException(const char* file, int line) : Exception(file, line)
+		{
+		}
 
-		IOException::IOException(std::string msg, const char *file, int line) : Exception(std::move(msg), file, line)
-		{}
+		IOException::IOException(std::string msg, const char* file, int line) : Exception(std::move(msg), file, line)
+		{
+		}
 
-		const char *IOException::exceptionName() const
+		const char* IOException::exceptionName() const
 		{
 			return "An IOException";
 		}
@@ -32,14 +34,14 @@ namespace pd2hook
 			vector<string> files;
 			WIN32_FIND_DATA ffd;
 			TCHAR szDir[MAX_PATH];
-			TCHAR *fPath = (TCHAR*)path.c_str();
-			//WideCharToMultiByte(CP_ACP, 0, ffd.cFileName, -1, fileName, MAX_PATH, &DefChar, NULL);
+			TCHAR* fPath = (TCHAR*)path.c_str();
+			// WideCharToMultiByte(CP_ACP, 0, ffd.cFileName, -1, fileName, MAX_PATH, &DefChar, NULL);
 
 			size_t length_of_arg;
 			HANDLE hFind = INVALID_HANDLE_VALUE;
 			DWORD dwError = 0;
 			StringCchLength(fPath, MAX_PATH, &length_of_arg);
-			if (length_of_arg>MAX_PATH - 3)
+			if (length_of_arg > MAX_PATH - 3)
 			{
 				PD2HOOK_THROW_IO_MSG("Path too long");
 			}
@@ -59,8 +61,7 @@ namespace pd2hook
 				{
 					files.push_back(ffd.cFileName);
 				}
-			}
-			while (FindNextFile(hFind, &ffd) != 0);
+			} while (FindNextFile(hFind, &ffd) != 0);
 
 			dwError = GetLastError();
 			if (dwError != ERROR_NO_MORE_FILES)
@@ -92,8 +93,10 @@ namespace pd2hook
 			}
 
 			DWORD ftyp = GetFileAttributes(clean.c_str());
-			if (ftyp == INVALID_FILE_ATTRIBUTES) return false;
-			if (ftyp & FILE_ATTRIBUTE_DIRECTORY) return true;
+			if (ftyp == INVALID_FILE_ATTRIBUTES)
+				return false;
+			if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
+				return true;
 			return false;
 		}
 
@@ -107,7 +110,7 @@ namespace pd2hook
 			return CreateDirectory(path.c_str(), NULL);
 		}
 
-		FileType GetFileType(const std::string &path)
+		FileType GetFileType(const std::string& path)
 		{
 			DWORD dwAttrib = GetFileAttributesA(path.c_str());
 
@@ -125,7 +128,7 @@ namespace pd2hook
 			}
 		}
 
-		bool MoveDirectory(const std::string & path, const std::string & destination)
+		bool MoveDirectory(const std::string& path, const std::string& destination)
 		{
 			bool success = MoveFileEx(path.c_str(), destination.c_str(), MOVEFILE_WRITE_THROUGH);
 			if (!success)
@@ -135,5 +138,5 @@ namespace pd2hook
 			return success;
 		}
 
-	}
-}
+	} // namespace Util
+} // namespace pd2hook

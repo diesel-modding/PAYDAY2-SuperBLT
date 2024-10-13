@@ -7,10 +7,10 @@ namespace pd2hook
 {
 	class VRManager
 	{
-	private:
+	  private:
 		VRManager();
 
-	public:
+	  public:
 		~VRManager();
 
 		bool IsLoaded();
@@ -22,9 +22,9 @@ namespace pd2hook
 		static VRManager* VRManager::GetInstance();
 
 		static void CheckAndLoad();
-	private:
+
+	  private:
 	};
-}
+} // namespace pd2hook
 
 #endif // __VR_HEADER__
-

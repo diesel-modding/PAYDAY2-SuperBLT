@@ -6,11 +6,11 @@
 #include "lua.h"
 #include "lua_functions.h"
 
+#include "assets/assets.h"
 #include "console/console.h"
-#include "vr/vr.h"
 #include "signatures/signatures.h"
 #include "tweaker/xmltweaker.h"
-#include "assets/assets.h"
+#include "vr/vr.h"
 
 #include "subhook.h"
 #include "util/util.h"
@@ -32,7 +32,7 @@ static subhook::Hook gameUpdateDetour, newStateDetour, luaCloseDetour, node_from
 
 static void init_idstring_pointers()
 {
-	char *tmp;
+	char* tmp;
 
 	if (try_open_functions.empty())
 	{
@@ -56,8 +56,9 @@ static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char fr
 	int ret = luaL_newstate(thislol, no, freakin, clue);
 
 	lua_State* L = (lua_State*)*((void**)thislol);
-	//printf("Lua State: %p\n", (void*)L);
-	if (!L) return ret;
+	// printf("Lua State: %p\n", (void*)L);
+	if (!L)
+		return ret;
 
 	blt::lua_functions::initiate_lua(L);
 
@@ -97,10 +98,11 @@ static void __fastcall edit_node_from_xml_hook(int arg);
 
 static void __cdecl node_from_xml_new(void* node, char* data, int* len)
 {
-	char *modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
+	char* modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
 	int modLen = *len;
 
-	if (modded != data) {
+	if (modded != data)
+	{
 		modLen = strlen(modded);
 	}
 
@@ -167,10 +169,11 @@ void blt::platform::ClosePlatform()
 {
 	// Okay... let's not do that.
 	// I don't want to keep this in memory, but it CRASHES THE SHIT OUT if you delete this after all is said and done.
-	if (console) delete console;
+	if (console)
+		delete console;
 }
 
-void blt::platform::GetPlatformInformation(lua_State * L)
+void blt::platform::GetPlatformInformation(lua_State* L)
 {
 	lua_pushstring(L, "mswindows");
 	lua_setfield(L, -2, "platform");
@@ -187,13 +190,15 @@ void blt::platform::win32::OpenConsole()
 	}
 }
 
-void * blt::platform::win32::get_lua_func(const char* name)
+void* blt::platform::win32::get_lua_func(const char* name)
 {
 	// Only allow getting the Lua functions
-	if (strncmp(name, "lua", 3)) return NULL;
+	if (strncmp(name, "lua", 3))
+		return NULL;
 
 	// Don't allow getting the setup functions
-	if (!strncmp(name, "luaL_newstate", 13)) return NULL;
+	if (!strncmp(name, "luaL_newstate", 13))
+		return NULL;
 
 	return SignatureSearch::GetFunctionByName(name);
 }
@@ -208,16 +213,17 @@ bool blt::platform::lua::GetForcePCalls()
 void blt::platform::lua::SetForcePCalls(bool state)
 {
 	// Don't change if already set up
-	if (state == GetForcePCalls()) return;
+	if (state == GetForcePCalls())
+		return;
 
 	if (state)
 	{
 		luaCallDetour.Install(lua_call, blt::lua_functions::perform_lua_pcall);
-		//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
+		// PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
 	}
 	else
 	{
 		luaCallDetour.Remove();
-		//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
+		// PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
 	}
 }

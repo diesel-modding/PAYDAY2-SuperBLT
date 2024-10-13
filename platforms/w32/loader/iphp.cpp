@@ -1,8 +1,8 @@
 #ifdef BLT_USE_IPHLPAPI
 
 #define WIN32_LEAN_AND_MEAN 1
-#include <windows.h>
 #include "InitState.h"
+#include <windows.h>
 
 #include <memory>
 
@@ -22,7 +22,7 @@ namespace pd2hook
 
 		struct DllStateDestroyer
 		{
-			void operator()(DllState *state)
+			void operator()(DllState* state)
 			{
 				DestroyStates();
 
@@ -34,8 +34,8 @@ namespace pd2hook
 		};
 
 		std::unique_ptr<DllState, DllStateDestroyer> State;
-	}
-}
+	} // namespace
+} // namespace pd2hook
 
 BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 {
@@ -52,8 +52,8 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		HMODULE hL = pd2hook::State->hL;
 
 		hL = LoadLibrary(bufd);
-		if (!hL) return false;
-
+		if (!hL)
+			return false;
 
 		p[0] = GetProcAddress(hL, "AddIPAddress");
 		p[1] = GetProcAddress(hL, "AllocateAndGetInterfaceInfoFromStack");
@@ -324,7 +324,6 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		p[266] = GetProcAddress(hL, "register_icmp");
 
 		pd2hook::InitiateStates();
-
 	}
 	if (reason == DLL_PROCESS_DETACH)
 	{
