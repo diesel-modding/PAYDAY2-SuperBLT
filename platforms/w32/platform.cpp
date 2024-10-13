@@ -30,6 +30,32 @@ blt::idstring *blt::platform::last_loaded_name = idstring_none, *blt::platform::
 
 static subhook::Hook gameUpdateDetour, newStateDetour, luaCloseDetour, node_from_xmlDetour;
 
+// This is a very old anti-debug check, from before Overkill/Starbreeze cared about modding.
+// It's nice to be able to attach a debugger to figure out where something went wrong.
+subhook::Hook NtSetInformationThreadHook;
+subhook::Hook NtQueryInformationProcessHook;
+
+// See https://doxygen.reactos.org/d8/d22/ntoskrnl_2ps_2query_8c.html#ae39720dde0849390adeac6c9439aa47d
+enum THREADINFOCLASS : uint32_t
+{
+	ThreadHideFromDebugger = 0x11,
+};
+enum PROCESSINFOCLASS : uint32_t
+{
+	ProcessDebugFlags = 0x1f,
+};
+NTSTATUS(NTAPI* NtSetInformationThread)
+(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength);
+NTSTATUS(NTAPI* NtQueryInformationProcess)
+(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation,
+ ULONG ProcessInformationLength, PULONG ReturnLength);
+
+NTSTATUS NTAPI NtSetInformationThreadFn(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass,
+                                        PVOID ThreadInformation, ULONG ThreadInformationLength);
+NTSTATUS NTAPI NtQueryInformationProcessFn(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass,
+                                           PVOID ProcessInformation, ULONG ProcessInformationLength,
+                                           PULONG ReturnLength);
+
 static void init_idstring_pointers()
 {
 	char* tmp;
@@ -163,6 +189,14 @@ void blt::platform::InitPlatform()
 	blt::win32::InitAssets();
 
 	init_idstring_pointers();
+
+	// Get these functions the same way PD2 does, from ntdll.
+	HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+	NtSetInformationThread = (decltype(NtSetInformationThread))GetProcAddress(ntdll, "NtSetInformationThread");
+	NtQueryInformationProcess = (decltype(NtQueryInformationProcess))GetProcAddress(ntdll, "NtQueryInformationProcess");
+
+	NtSetInformationThreadHook.Install((void*)NtSetInformationThread, (void*)NtSetInformationThreadFn);
+	NtQueryInformationProcessHook.Install((void*)NtQueryInformationProcess, (void*)NtQueryInformationProcessFn);
 }
 
 void blt::platform::ClosePlatform()
@@ -226,4 +260,35 @@ void blt::platform::lua::SetForcePCalls(bool state)
 		luaCallDetour.Remove();
 		// PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
 	}
+}
+
+NTSTATUS NTAPI NtSetInformationThreadFn(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass,
+                                        PVOID ThreadInformation, ULONG ThreadInformationLength)
+{
+	if (ThreadInformationClass == ThreadHideFromDebugger && ThreadInformation == nullptr &&
+	    ThreadInformationLength == 0 && ThreadHandle == GetCurrentThread())
+	{
+		// If this function fails, the game skips it's main logic.
+		return 0;
+	}
+
+	subhook::ScopedHookRemove shr(&NtSetInformationThreadHook);
+	return NtSetInformationThread(ThreadHandle, ThreadInformationClass, ThreadInformation, ThreadInformationLength);
+}
+
+NTSTATUS NTAPI NtQueryInformationProcessFn(HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass,
+                                           PVOID ProcessInformation, ULONG ProcessInformationLength,
+                                           PULONG ReturnLength)
+{
+	if (ProcessInformationClass == ProcessDebugFlags && ProcessInformationLength == 4 && ReturnLength == nullptr &&
+	    ProcessHandle == GetCurrentProcess())
+	{
+		// Without this, the main loop exits from Application::update
+		*(uint32_t*)ProcessInformation = 1;
+		return 0;
+	}
+
+	subhook::ScopedHookRemove shr(&NtQueryInformationProcessHook);
+	return NtQueryInformationProcess(ProcessHandle, ProcessInformationClass, ProcessInformation,
+	                                 ProcessInformationLength, ReturnLength);
 }
