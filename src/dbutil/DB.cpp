@@ -94,7 +94,7 @@ DieselDB* DieselDB::Instance()
 	return &instance;
 }
 
-static void loadPackageHeader(DieselBundle* bundle, FileList);
+static void loadPackageHeader(const std::string& pathPrefix, DieselBundle* bundle, FileList);
 static void loadBundleHeader(std::string filename, FileList);
 
 ////////////////////////
@@ -125,6 +125,18 @@ DieselDB::DieselDB()
 {
 	uint64_t start_time = monotonicTimeMicros();
 	PD2HOOK_LOG_LOG("Start loading DB info");
+
+	// Something in dxdiagn.dll changes the working directory to C:\Windows for a short
+	// period, which causes a race condition since that's happening on another thread.
+	// Since we open so many files, it's relatively likely we'll end up hitting it.
+#ifdef _WIN32
+	pathPrefix.resize(GetCurrentDirectory(0, nullptr) + 1); // +1 for null char
+	DWORD workingDirLen = GetCurrentDirectory(pathPrefix.size(), pathPrefix.data());
+	pathPrefix.resize(workingDirLen); // Remove the null character
+	pathPrefix.push_back('/');
+#else
+	pathPrefix = "";
+#endif
 
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
@@ -227,10 +239,10 @@ DieselDB::DieselDB()
 		auto* bundle = new DieselBundle();
 		bundle->headerPath = headerPath;
 		bundle->path = dataPath;
-		loadPackageHeader(bundle, filesList);
+		loadPackageHeader(pathPrefix, bundle, filesList);
 	}
 
-	loadBundleHeader("assets/all_h.bundle", filesList);
+	loadBundleHeader(pathPrefix + "assets/all_h.bundle", filesList);
 
 	// We're done loading, print out how long it took and how many files it's tracking (to estimate memory usage)
 	uint64_t end_time = monotonicTimeMicros();
@@ -242,11 +254,11 @@ DieselDB::DieselDB()
 	PD2HOOK_LOG_LOG(buff);
 }
 
-static void loadPackageHeader(DieselBundle* bundle, FileList files)
+static void loadPackageHeader(const std::string& pathPrefix, DieselBundle* bundle, FileList files)
 {
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
-	in.open(bundle->headerPath, std::ios::binary);
+	in.open(pathPrefix + bundle->headerPath, std::ios::binary);
 
 	// Skip an int, the length of the header
 	in.seekg(4, std::ios::cur);

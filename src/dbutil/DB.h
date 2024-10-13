@@ -71,6 +71,7 @@ namespace blt::db
 		BLTAbstractDataStore* Open(DieselBundle* bundle);
 
 	  private:
+		std::string pathPrefix;
 		std::vector<DslFile> filesList;
 		std::map<std::pair<idstring, idstring>, DslFile*> files;
 	};
