@@ -15,6 +15,9 @@ namespace blt::plugins
 	{
 	public:
 		UnixPlugin(std::string file);
+		~UnixPlugin() override;
+		bool Unload() const override;
+
 	protected:
 		virtual void *ResolveSymbol(std::string name) const;
 	private:
@@ -60,6 +63,33 @@ namespace blt::plugins
 		if (!init) throw "Invalid dlhandle - missing initfunc!";
 
 		init();
+	}
+
+	UnixPlugin::~UnixPlugin()
+	{
+	}
+
+	bool UnixPlugin::Unload() const 
+	{
+		PD2HOOK_LOG_WARN("Unloading is not natively supported on Unix systems.");
+		return false;
+
+		/*
+		This implementation should work but could be removed as native Linux support is probably gone for good
+
+		// Execute Plugin unload function if it exists
+		unload_func_t unload = (unload_func_t) dlsym(module, "SuperBLT_Plugin_Unload");
+		if (!unload) {
+			PD2HOOK_LOG_ERROR("SuperBLT_Plugin_Unload not found in Plugin. Skipping unload request...");
+			return false;	
+		}
+		
+		if (!unload())
+			return false;
+
+		dlclose(module);
+		return true;
+		*/
 	}
 
 	void *UnixPlugin::ResolveSymbol(std::string name) const

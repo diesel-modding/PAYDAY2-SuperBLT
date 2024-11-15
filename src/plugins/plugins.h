@@ -14,12 +14,14 @@ namespace blt
 		typedef void(*update_func_t)(lua_State *L);
 		typedef void(*setup_state_func_t)(lua_State *L);
 		typedef int(*push_lua_func_t)(lua_State *L);
+		typedef bool(*unload_func_t)();
 
 		class Plugin
 		{
 		public:
 			Plugin(std::string file);
 			Plugin(Plugin&) = delete;
+			virtual ~Plugin();
 
 			void AddToState(lua_State *L);
 
@@ -31,6 +33,7 @@ namespace blt
 			}
 
 			int PushLuaValue(lua_State *L);
+			virtual bool Unload() const = 0;
 
 		protected:
 			void Init();
@@ -53,6 +56,15 @@ namespace blt
 
 		PluginLoadResult LoadPlugin(std::string file, Plugin **out_plugin = NULL);
 		const std::list<Plugin*> &GetPlugins();
+
+		enum PluginUnloadResult
+		{
+			pur_Failure,
+			pur_Success,
+			pur_NotLoaded
+		};
+
+		PluginUnloadResult UnloadPlugin(std::string file);
 
 		// Implemented in InitiateState
 		// TODO find a cleaner solution

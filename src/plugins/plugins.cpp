@@ -65,7 +65,30 @@ namespace blt
 			return plugins_list;
 		}
 
+		PluginUnloadResult UnloadPlugin(std::string file)
+		{
+			for (Plugin* plugin : plugins_list)
+			{
+				if (file == plugin->GetFile())
+				{
+					if(plugin->Unload()) {
+						plugins_list.remove(plugin);
+						delete plugin;
+						return pur_Success;
+					}
+
+					return pur_Failure;
+				}
+			}
+
+			return pur_NotLoaded;
+		}
+
 		Plugin::Plugin(std::string file) : file(file)
+		{
+		}
+
+		Plugin::~Plugin() 
 		{
 		}
 

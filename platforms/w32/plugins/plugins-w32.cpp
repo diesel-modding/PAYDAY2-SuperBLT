@@ -159,6 +159,8 @@ class WindowsPlugin : public Plugin
 {
   public:
 	WindowsPlugin(std::string file);
+	~WindowsPlugin() override;
+	bool Unload() const override;
 
   protected:
 	virtual void* ResolveSymbol(std::string name) const;
@@ -182,6 +184,30 @@ WindowsPlugin::WindowsPlugin(std::string file) : Plugin(file)
 		throw "Invalid module - missing initfunc!";
 
 	init(get_func);
+}
+
+WindowsPlugin::~WindowsPlugin() 
+{
+}
+
+bool WindowsPlugin::Unload() const
+{
+	// Execute Plugin unload function if it exists
+	unload_func_t unload = (unload_func_t)GetProcAddress(module, "SuperBLT_Plugin_Unload");
+	// If the dll doesn't export the function we simply get out without throwing 
+	// Needed for backwards compatibility among other things
+	if (!unload) {
+		PD2HOOK_LOG_WARN("SuperBLT_Plugin_Unload not found in Plugin. Skipping unload request...");
+		return false;	
+	}
+
+	// If the unload function returns false then Unloading is not supported by the Plugin
+	if (!unload())
+		return false;
+	
+	// Otherwise actually unload .dll
+	FreeLibrary(module);	
+	return true;
 }
 
 void* WindowsPlugin::ResolveSymbol(std::string name) const

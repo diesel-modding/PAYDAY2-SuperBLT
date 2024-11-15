@@ -742,6 +742,38 @@ namespace pd2hook
 		}
 	}
 
+	int luaF_unload_native(lua_State* L)
+	{
+		std::string file(lua_tostring(L, 1));
+
+		try
+		{
+			switch(blt::plugins::UnloadPlugin(file)) 
+			{
+			case 0:		// pur_Failure
+				lua_pushboolean(L, false);
+				lua_pushstring(L, "Unloading failed");
+				break;
+			case 1:		// pur_Success
+				lua_pushboolean(L, true);
+				lua_pushnil(L);
+				break;
+
+			default:	// pur_NotLoaded
+				lua_pushboolean(L, false);
+				lua_pushstring(L, "Not loaded");
+				break;
+			}
+
+			return 2;
+		}
+		catch (std::string err)
+		{
+			luaL_error(L, err.c_str());
+			return 0;
+		}
+	}
+
 	int luaF_blt_info(lua_State* L)
 	{
 		lua_newtable(L);
@@ -968,6 +1000,7 @@ namespace blt
 				{ "structid", luaF_structid },
 				{ "ignoretweak", luaF_ignoretweak },
 				{ "load_native", luaF_load_native },
+				{ "unload_native", luaF_unload_native },
 				{ "blt_info", luaF_blt_info },
 
 				// Functions that are supposed to be in Lua, but are either omitted or implemented improperly (pcall)
