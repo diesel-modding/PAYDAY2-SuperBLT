@@ -162,23 +162,27 @@ target_link_libraries(SuperBLT wren)
 target_link_libraries(SuperBLT subhook)
 
 if(WIN32)
+	# Disable all the install targets, otherwise it causes errors when we add dependencies to curl
+	function(install)
+	endfunction()
+
 	# Note that libressl must be downloaded seperately, since it requires some pre-configuration that
 	# is inconvenient on Windows. Here's the download URL:
-	# https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-4.0.0.tar.gz
-	set(LSSL_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/libressl-4.0.0)
+	# https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.7.3.tar.gz
+	set(LSSL_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/libressl-3.7.3)
 	set(LSSL_TARBALL ${LSSL_SRCDIR}.tar.gz)
 	if(NOT EXISTS ${LSSL_TARBALL})
 		# TODO move this to my (ZNix's) server, in case the paths ever change
 		message("Downloading LibreSSL")
-		file(DOWNLOAD "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-4.0.0.tar.gz" ${LSSL_TARBALL}
+		file(DOWNLOAD "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.7.3.tar.gz" ${LSSL_TARBALL}
 			TIMEOUT 60  # seconds
-			EXPECTED_HASH SHA256=4d841955f0acc3dfc71d0e3dd35f283af461222350e26843fea9731c0246a1e4
+			EXPECTED_HASH SHA256=7948c856a90c825bd7268b6f85674a8dcd254bae42e221781b24e3f8dc335db3
 			TLS_VERIFY ON
 		)
 	endif()
 	if(NOT EXISTS ${LSSL_SRCDIR})
 		message("Extracting LibreSSL")
-		file(ARCHIVE_EXTRACT INPUT ${LSSL_TARBALL} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/ PATTERNS libressl-4.0.0)
+		file(ARCHIVE_EXTRACT INPUT ${LSSL_TARBALL} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/ PATTERNS libressl-3.7.3)
 	endif()
 
 	######
@@ -195,29 +199,23 @@ if(WIN32)
 
 	# Unfortunately cmake doesn't have namespacing, so we have to set stuff here
 	set(LIBTYPE STATIC)
-	set(ALSOFT_INSTALL OFF)
-	set(ALSOFT_INSTALL_CONFIG OFF)
-	set(ALSOFT_INSTALL_HRTF_DATA OFF)
-	set(ALSOFT_INSTALL_AMBDEC_PRESETS OFF)
-
 	add_subdirectory(lib/sys/openalsoft EXCLUDE_FROM_ALL)
 	target_link_libraries(OpenAL PRIVATE winmm.lib) # Not set up by default?
 	target_link_libraries(SuperBLT OpenAL)
 	# target_include_directories(SuperBLT PRIVATE ${OpenAL_SOURCE_DIR}/include) # No longer needed
 
-	add_subdirectory(lib/sys/libressl-4.0.0 EXCLUDE_FROM_ALL)
+	add_subdirectory(lib/sys/libressl-3.7.3 EXCLUDE_FROM_ALL)
 	target_include_directories(SuperBLT PRIVATE ${LSSL_SRCDIR}/include) # Required for latest version of LibreSSL
 	target_link_libraries(SuperBLT crypto)
 
 	#### CURL ####
 	# Turn off all the crap we don't want
-	set(HTTP_ONLY ON)
-	set(CURL_DISABLE_HTTP_AUTH ON)
-	set(CURL_DISABLE_INSTALL ON)
+	option(HTTP_ONLY "" ON)
+	option(CURL_DISABLE_CRYPTO_AUTH "" ON)
 
 	# Use WinSSL rather than our static-linked copy of LibreSSL so we can use the
 	# default Windows certificate store without any hassle
-	set(CURL_USE_SCHANNEL ON)
+	option(CMAKE_USE_WINSSL "" ON)
 
 	# TODO enable zlib
 

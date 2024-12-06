@@ -7,9 +7,8 @@
 # target_link_libraries(curl PUBLIC zstatic)
 
 # Turn off all the crap we don't want
-set(HTTP_ONLY ON)
-set(CURL_DISABLE_CRYPTO_AUTH ON)
-set(BUILD_STATIC_LIBS ON)
+option(HTTP_ONLY "" ON)
+option(CURL_DISABLE_CRYPTO_AUTH "" ON)
 
 add_subdirectory(lib/sys/curl EXCLUDE_FROM_ALL)
-target_compile_options(curl PRIVATE -fPIC)
+target_compile_options(libcurl PRIVATE -fPIC)
