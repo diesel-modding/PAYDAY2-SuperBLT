@@ -222,6 +222,7 @@ if(WIN32)
 	# TODO enable zlib
 
 	add_subdirectory(lib/sys/curl EXCLUDE_FROM_ALL)
+	target_link_libraries(libcurl crypto ssl)
 	target_link_libraries(SuperBLT libcurl)
 else()
 	# TODO merge this and the Windows dependencies section together, where useful
