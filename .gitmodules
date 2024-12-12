@@ -4,9 +4,6 @@
 [submodule "lib/wren"]
 	path = lib/wren
 	url = https://github.com/munificent/wren.git
-[submodule "lib/subhook"]
-	path = lib/subhook
-	url = https://github.com/Zeex/subhook.git
 [submodule "lib/sys/zlib"]
 	path = lib/sys/zlib
 	ignore = all # Changes are made by cmake
