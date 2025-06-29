@@ -4,6 +4,12 @@ This lists the changes between different versions of the SuperBLT DLL,
 the changes for the basemod are listed in their own changelog.
 Contributors other than maintainers are listed in parenthesis after specific changes.
 
+## Version 3.3.9
+
+- Updated used libraries (test1)
+- Added DB API for native plugins (Joppe)
+- Added native plugin unloading (yupiel)
+
 ## Version 3.3.8
 
 This is a hotfix for asset database loading
