@@ -142,7 +142,7 @@ namespace blt
 
 			if(developer)
 			{
-				PD2HOOK_LOG_WARN("Loading development plugin! This should never occur ourside a development enviornment");
+				PD2HOOK_LOG_WARN("Loading development plugin! This should never occur outside a development enviornment");
 			}
 
 			setup_state = (setup_state_func_t) ResolveSymbol("SuperBLT_Plugin_Init_State");
