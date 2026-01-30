@@ -4,6 +4,9 @@ This lists the changes between different versions of the SuperBLT DLL,
 the changes for the basemod are listed in their own changelog.
 Contributors other than maintainers are listed in parenthesis after specific changes.
 
+## Version 3.4.0
+- Updated to use absolute paths to fix issues with mod organizer (ZNix)
+
 ## Version 3.3.9
 
 - Updated used libraries (test1)
