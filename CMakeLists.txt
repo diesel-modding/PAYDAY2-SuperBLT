@@ -18,6 +18,10 @@ set(CMAKE_CXX_STANDARD 17)
 # Enable XAudio
 add_definitions(-DENABLE_XAUDIO)
 
+# zlib declares compatibility with a really old version of cmake, newer versions
+# will otherwise fail because of this.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
 ###############################################################################
 ## file globbing ##############################################################
 ###############################################################################
