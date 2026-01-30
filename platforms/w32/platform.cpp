@@ -95,6 +95,8 @@ static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char fr
 
 void* __fastcall do_game_update_new(void* thislol, int edx, int* a, int* b)
 {
+	// FIXME I think this is hooked on the wrong function, and is called multiple times per frame?
+
 	subhook::ScopedHookRemove scoped_remove(&gameUpdateDetour);
 
 	// If someone has a better way of doing this, I'd like to know about it.

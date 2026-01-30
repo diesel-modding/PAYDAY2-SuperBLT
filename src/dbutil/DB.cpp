@@ -95,7 +95,7 @@ DieselDB* DieselDB::Instance()
 }
 
 static void loadPackageHeader(const std::string& pathPrefix, DieselBundle* bundle, FileList);
-static void loadBundleHeader(std::string filename, FileList);
+static void loadBundleHeader(const std::string& pathPrefix, const std::string& filename, std::vector<DslFile>&);
 
 ////////////////////////
 ////// DSL FILE ////////
@@ -229,7 +229,7 @@ DieselDB::DieselDB()
 			continue;
 		}
 
-		std::string headerPath = "assets/" + name;
+		std::string headerPath = pathPrefix + "assets/" + name;
 
 		// Find the headerPath to the data file - chop out the '_h' bit
 		std::string dataPath = headerPath;
@@ -242,7 +242,7 @@ DieselDB::DieselDB()
 		loadPackageHeader(pathPrefix, bundle, filesList);
 	}
 
-	loadBundleHeader(pathPrefix + "assets/all_h.bundle", filesList);
+	loadBundleHeader(pathPrefix, pathPrefix + "assets/all_h.bundle", filesList);
 
 	// We're done loading, print out how long it took and how many files it's tracking (to estimate memory usage)
 	uint64_t end_time = monotonicTimeMicros();
@@ -258,7 +258,7 @@ static void loadPackageHeader(const std::string& pathPrefix, DieselBundle* bundl
 {
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
-	in.open(pathPrefix + bundle->headerPath, std::ios::binary);
+	in.open(bundle->headerPath, std::ios::binary);
 
 	// Skip an int, the length of the header
 	in.seekg(4, std::ios::cur);
@@ -290,7 +290,7 @@ static void loadPackageHeader(const std::string& pathPrefix, DieselBundle* bundl
 	// TODO set a length for the last file
 }
 
-static void loadBundleHeader(std::string filename, FileList files)
+static void loadBundleHeader(const std::string& pathPrefix, const std::string& filename, std::vector<DslFile>& files)
 {
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
@@ -328,7 +328,7 @@ static void loadBundleHeader(std::string filename, FileList files)
 		// Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
 		DieselBundle* dieselBundle = new DieselBundle();
 		dieselBundle->headerPath = filename;
-		dieselBundle->path = "assets/all_" + std::to_string(bundle.id) + ".bundle";
+		dieselBundle->path = pathPrefix + "assets/all_" + std::to_string(bundle.id) + ".bundle";
 
 		for (ItemInfo item : loadVector<ItemInfo>(in, 4, bundle.vec))
 		{
