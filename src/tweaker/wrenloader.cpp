@@ -506,7 +506,7 @@ WrenVM* pd2hook::wren::get_wren_vm()
 			PD2HOOK_LOG_ERROR("Wren init failed: compile or runtime error!");
 
 #ifdef _WIN32
-			MessageBox(nullptr, "Failed to initialise the Wren system - see the log for details", "Wren Error", MB_OK);
+			MessageBox(nullptr, "Failed to initialise the Wren system - see the log in mods/logs/ for details", "Wren Error", MB_OK);
 			ExitProcess(1);
 #else
 			abort();
