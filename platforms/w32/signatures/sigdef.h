@@ -150,6 +150,13 @@ extern std::vector<void*> try_open_functions;
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, do_game_update, void*, "\x55\x8B\xEC\x56\xFF\x75\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxxxx????xxx", 0, int*, int*)
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, luaL_newstate, int, "\x55\x8B\xEC\x8B\x45\x10\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68", "xxxxxxxxxxxxxxx", 0, char, char, int)
 
+struct idstr
+{
+	unsigned long long _id;
+};
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, sound_WwDevice_load_bank_idstring, void*, "\x55\x8B\xEC\x6A\x00\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x00\x53\x56\x57\xA1\x00\x00\x00\x00\x33\xC5\x50\x8D\x45\x00\x64\xA3\x00\x00\x00\x00\x8B\xD9\x8B\xBB\x00\x00\x00\x00\x8D\x45\x00\x8B\x77\x00\x50\x8D\x4F", "xxxx?x????xx????xxx?xxxx????xxxxx?xx????xxxx????xx?xx?xxx", 0, idstr, int);
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, sound_WwDevice_id_to_entry, idstr*, "\x55\x8B\xEC\x83\xEC\x00\x8B\x81\x00\x00\x00\x00\x53\x8B\x58", "xxxxx?xx????xxx", 0, idstr*, unsigned int);
+
 // Since the start of this function is very generic, grab a later section and seek backwards
 // Also note about stack_pad: for whatever reason it seems the function pops eight extra bytes, so
 // all the calls to it in-game I saw subtracted eight from ESP before pushing their arguments. I

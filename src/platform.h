@@ -61,6 +61,17 @@ namespace blt
 		{
 			void OpenConsole();
 			void* get_lua_func(const char* name);
+
+			namespace wwise
+			{
+				// Custom soundbanks that need to be loaded must be registered somewhere since Diesel tries to find
+				// hashed names
+				void RegisterCustomSoundbank(const char* dbPath);
+				void UnregisterCustomSoundbank(const char* dbPath);
+
+				void RegisterCustomStreamedWemPath(unsigned int wemId, const char* dbPath);
+				void UnregisterCustomStreamedWemPath(unsigned int wemId);
+			};
 		};
 #endif
 	};

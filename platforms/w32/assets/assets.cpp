@@ -9,8 +9,12 @@
 #include "platform.h"
 #include "subhook.h"
 
+#include "util/util.h"
+
 #include <stdio.h>
 
+#include <map>
+#include <mutex>
 #include <string>
 #include <tweaker/db_hooks.h>
 #include <utility>
@@ -100,6 +104,90 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 	}
 }
 
+static subhook::Hook WwDevice_loadBankIdstringDetour;
+static subhook::Hook WwDevice_idToEntryDetour;
+
+class SoundBank;
+
+// I hate this hack, but it's the only way to get __thiscalls to be stack accurate
+template <typename T> void* GetAddressOfClassFunction(T func)
+{
+	union
+	{
+		T func_;
+		void* addr;
+	};
+	func_ = func;
+	return addr;
+}
+
+unsigned int GetWwiseHash(const char* str)
+{
+	unsigned int hash = 2166136261;
+	for (int i = 0; i < strlen(str); i++)
+	{
+		hash = str[i] ^ (16777619 * hash);
+	}
+	return hash;
+}
+
+// Access happens on two different threads
+std::mutex customWwiseMapsMutex;
+std::map<blt::idstring, std::string> customWwiseSoundbankNames;
+std::map<unsigned int, blt::idstring> customWwiseIdToEntryNames;
+
+class sound_WwDevice
+{
+  public:
+	virtual ~sound_WwDevice() = 0;
+	virtual void unneeded_virtual_1() = 0;
+	virtual void unneeded_virtual_2() = 0;
+	virtual void unneeded_virtual_3() = 0;
+	virtual void unneeded_virtual_4() = 0;
+	virtual void unneeded_virtual_5() = 0;
+	virtual SoundBank* load_bank_idstring(idstr bank, int async) = 0;
+	virtual SoundBank* load_bank_string(const char* bank, bool async) = 0;
+
+  public:
+	SoundBank* load_bank_idstring_new(idstr bank, int async)
+	{
+		subhook::ScopedHookRemove scoped_remove(&WwDevice_loadBankIdstringDetour);
+
+		SoundBank* soundbank = (SoundBank*)sound_WwDevice_load_bank_idstring((void*)this, bank, async);
+
+		if (soundbank == nullptr) {
+			std::lock_guard customListLock(customWwiseMapsMutex);
+			if (customWwiseSoundbankNames.find(bank._id) != customWwiseSoundbankNames.end())
+			{
+				soundbank = load_bank_string(customWwiseSoundbankNames[bank._id].c_str(), async);
+			}
+		}
+
+		return soundbank;
+	}
+
+	idstr* id_to_entry_new(idstr* result, unsigned int wwise_id)
+	{
+		subhook::ScopedHookRemove scoped_remove(&WwDevice_idToEntryDetour);
+
+		result = sound_WwDevice_id_to_entry((void*)this, result, wwise_id);
+
+		if (result->_id != 0x8DB63936938575BF) // empty idstring (""), default return value from sound::WwDevice::id_to_entry if no match was found
+		{
+			return result;
+		}
+
+		std::lock_guard customListLock(customWwiseMapsMutex);
+
+		if (customWwiseIdToEntryNames.find(wwise_id) != customWwiseIdToEntryNames.end())
+		{
+			result->_id = customWwiseIdToEntryNames[wwise_id];
+		}
+
+		return result;
+	}
+};
+
 void blt::win32::InitAssets()
 {
 #define SETUP_PASSTHROUGH_ARRAY(id) hook_##id.Install(try_open_functions.at(id), stub_##id)
@@ -111,4 +199,53 @@ void blt::win32::InitAssets()
 		SETUP_PASSTHROUGH_ARRAY(2);
 	if (try_open_functions.size() > 3)
 		SETUP_PASSTHROUGH_ARRAY(3);
+
+	WwDevice_loadBankIdstringDetour.Install(sound_WwDevice_load_bank_idstring, GetAddressOfClassFunction(&sound_WwDevice::load_bank_idstring_new));
+	WwDevice_idToEntryDetour.Install(sound_WwDevice_id_to_entry, GetAddressOfClassFunction(&sound_WwDevice::id_to_entry_new));
+}
+
+void blt::platform::win32::wwise::RegisterCustomSoundbank(const char* dbPath)
+{
+	if (!dbPath)
+		return;
+
+	std::lock_guard customListLock(customWwiseMapsMutex);
+
+	blt::idstring hashedPath = blt::idstring_hash(dbPath);
+	unsigned int wwiseHash = GetWwiseHash(dbPath);
+	customWwiseSoundbankNames.insert(std::make_pair(hashedPath, dbPath));
+	customWwiseIdToEntryNames.insert(std::make_pair(wwiseHash, hashedPath));
+}
+
+void blt::platform::win32::wwise::UnregisterCustomSoundbank(const char* dbPath)
+{
+	if (!dbPath)
+		return;
+
+	std::lock_guard customListLock(customWwiseMapsMutex);
+
+	blt::idstring hashedPath = blt::idstring_hash(dbPath);
+	unsigned int wwiseHash = GetWwiseHash(dbPath);
+	if (customWwiseSoundbankNames.find(hashedPath) != customWwiseSoundbankNames.end())
+		customWwiseSoundbankNames.erase(hashedPath);
+	if (customWwiseIdToEntryNames.find(wwiseHash) != customWwiseIdToEntryNames.end())
+		customWwiseIdToEntryNames.erase(wwiseHash);
+}
+
+void blt::platform::win32::wwise::RegisterCustomStreamedWemPath(unsigned int wemId, const char* dbPath)
+{
+	if (!dbPath)
+		return;
+
+	std::lock_guard customListLock(customWwiseMapsMutex);
+
+	customWwiseIdToEntryNames.insert(std::make_pair(wemId, blt::idstring_hash(dbPath)));
+}
+
+void blt::platform::win32::wwise::UnregisterCustomStreamedWemPath(unsigned int wemId)
+{
+	std::lock_guard customListLock(customWwiseMapsMutex);
+
+	if (customWwiseIdToEntryNames.find(wemId) != customWwiseIdToEntryNames.end())
+		customWwiseIdToEntryNames.erase(wemId);
 }

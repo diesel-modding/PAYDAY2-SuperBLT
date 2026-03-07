@@ -148,12 +148,72 @@ static int ldb_has(lua_State* L)
 	return 1;
 }
 
+#ifdef _WIN32
+// register a custom Wwise soundbank so that Diesel can load it
+static int ldb_register_custom_soundbank(lua_State* L)
+{
+	const char* soundbankPath = lua_tostring(L, 1);
+
+	if (soundbankPath)
+	{
+		blt::platform::win32::wwise::RegisterCustomSoundbank(soundbankPath);
+	}
+	return 0;
+}
+
+// unregister a previously registered Wwise soundbank
+static int ldb_unregister_custom_soundbank(lua_State* L)
+{
+	const char* soundbankPath = lua_tostring(L, 1);
+
+	if (soundbankPath)
+	{
+		blt::platform::win32::wwise::UnregisterCustomSoundbank(soundbankPath);
+	}
+	return 0;
+}
+
+static int ldb_register_custom_streamed_wem(lua_State* L)
+{
+	// String only, cannot trust Lua numbers with hashed values
+	const char* wemId = lua_tostring(L, 1);
+	const char* dbPath = lua_tostring(L, 2);
+
+	if (wemId && dbPath)
+	{
+		blt::platform::win32::wwise::RegisterCustomStreamedWemPath(std::stoul(wemId), dbPath);
+	}
+
+	return 0;
+}
+
+static int ldb_unregister_custom_streamed_wem(lua_State* L)
+{
+	// String only, cannot trust Lua numbers with hashed values
+	const char* wemId = lua_tostring(L, 1);
+
+	if (wemId)
+	{
+		blt::platform::win32::wwise::UnregisterCustomStreamedWemPath(std::stoul(wemId));
+	}
+
+	return 0;
+}
+#endif
+
 void load_lua_asset_db(lua_State* L)
 {
 	// (note: ldb = Lua asset DB)
 	luaL_Reg vmLib[] = {
 		{"read_file", ldb_load},
 		{"has_file", ldb_has},
+
+#ifdef _WIN32
+		{"register_custom_soundbank", ldb_register_custom_soundbank},
+		{"unregister_custom_soundbank", ldb_unregister_custom_soundbank},
+		{"register_custom_streamed_wem", ldb_register_custom_streamed_wem},
+		{"unregister_custom_streamed_wem", ldb_unregister_custom_streamed_wem},
+#endif
 
 		{nullptr, nullptr},
 	};
