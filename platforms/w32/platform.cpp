@@ -28,7 +28,7 @@ static std::thread::id main_thread_id;
 
 blt::idstring *blt::platform::last_loaded_name = idstring_none, *blt::platform::last_loaded_ext = idstring_none;
 
-static subhook::Hook gameUpdateDetour, newStateDetour, luaCloseDetour, node_from_xmlDetour;
+static subhook::Hook applicationUpdateDetour, newStateDetour, luaCloseDetour, node_from_xmlDetour;
 
 // This is a very old anti-debug check, from before Overkill/Starbreeze cared about modding.
 // It's nice to be able to attach a debugger to figure out where something went wrong.
@@ -93,26 +93,24 @@ static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char fr
 	return ret;
 }
 
-void* __fastcall do_game_update_new(void* thislol, int edx, int* a, int* b)
+class Application
 {
-	// FIXME I think this is hooked on the wrong function, and is called multiple times per frame?
+  public:
+	virtual ~Application() = 0;
+	char padding[0x194];
+	lua_State** _lua_L;
 
-	subhook::ScopedHookRemove scoped_remove(&gameUpdateDetour);
-
-	// If someone has a better way of doing this, I'd like to know about it.
-	// I could save the this pointer?
-	// I'll check if it's even different at all later.
-	if (std::this_thread::get_id() != main_thread_id)
+	bool update_new()
 	{
-		return do_game_update(thislol, a, b);
+		subhook::ScopedHookRemove scoped_remove(&applicationUpdateDetour);
+
+		lua_State* L_ = *this->_lua_L;
+
+		blt::lua_functions::update(L_);
+
+		return Application__update((void*)this);
 	}
-
-	lua_State* L = (lua_State*)*((void**)thislol);
-
-	blt::lua_functions::update(L);
-
-	return do_game_update(thislol, a, b);
-}
+};
 
 void lua_close_new(lua_State* L)
 {
@@ -183,7 +181,7 @@ void blt::platform::InitPlatform()
 
 	SignatureSearch::Search();
 
-	gameUpdateDetour.Install(do_game_update, do_game_update_new);
+	applicationUpdateDetour.Install(Application__update, GetAddressOfClassFunction(&Application::update_new));
 	newStateDetour.Install(luaL_newstate, luaL_newstate_new);
 	luaCloseDetour.Install(lua_close, lua_close_new);
 

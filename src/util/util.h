@@ -247,4 +247,18 @@ namespace blt
 	idstring idstring_hash(const std::string& text);
 }
 
+
+// I hate this hack, but it's the only way to get __thiscalls to be stack accurate
+template <typename T> void* GetAddressOfClassFunction(T func)
+{
+	union
+	{
+		T func_;
+		void* addr;
+	};
+	func_ = func;
+	return addr;
+}
+
+
 #endif // __UTIL_HEADER__

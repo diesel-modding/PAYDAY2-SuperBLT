@@ -109,18 +109,6 @@ static subhook::Hook WwDevice_idToEntryDetour;
 
 class SoundBank;
 
-// I hate this hack, but it's the only way to get __thiscalls to be stack accurate
-template <typename T> void* GetAddressOfClassFunction(T func)
-{
-	union
-	{
-		T func_;
-		void* addr;
-	};
-	func_ = func;
-	return addr;
-}
-
 unsigned int GetWwiseHash(const char* str)
 {
 	unsigned int hash = 2166136261;
