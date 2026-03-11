@@ -73,7 +73,13 @@ void db_hook_asset_file_direct_bundle(blt::idstring name, blt::idstring ext, blt
 
 FileData* db_read_file(blt::idstring name, blt::idstring ext)
 {
-	FileData fd = find_file(name, ext);
+	FileData fd = find_file(name, ext, 0);
+	return new FileData(fd);
+}
+
+FileData* db_read_file_ex(blt::idstring name, blt::idstring ext, blt::idstring lang)
+{
+	FileData fd = find_file(name, ext, lang);
 	return new FileData(fd);
 }
 
@@ -135,6 +141,10 @@ static void* get_func(const char* name)
 	{
 		return &db_read_file;
 	}
+	else if (str == "db_read_file_ex")
+	{
+		return &db_read_file_ex;
+	}
 	else if (str == "db_free_file")
 	{
 		return &db_free_file;
@@ -186,7 +196,7 @@ WindowsPlugin::WindowsPlugin(std::string file) : Plugin(file)
 	init(get_func);
 }
 
-WindowsPlugin::~WindowsPlugin() 
+WindowsPlugin::~WindowsPlugin()
 {
 }
 
@@ -194,19 +204,19 @@ bool WindowsPlugin::Unload() const
 {
 	// Execute Plugin unload function if it exists
 	unload_func_t unload = (unload_func_t)GetProcAddress(module, "SuperBLT_Plugin_Unload");
-	// If the dll doesn't export the function we simply get out without throwing 
+	// If the dll doesn't export the function we simply get out without throwing
 	// Needed for backwards compatibility among other things
 	if (!unload) {
 		PD2HOOK_LOG_WARN("SuperBLT_Plugin_Unload not found in Plugin. Skipping unload request...");
-		return false;	
+		return false;
 	}
 
 	// If the unload function returns false then Unloading is not supported by the Plugin
 	if (!unload())
 		return false;
-	
+
 	// Otherwise actually unload .dll
-	FreeLibrary(module);	
+	FreeLibrary(module);
 	return true;
 }
 

@@ -19,6 +19,7 @@ namespace pd2hook::tweaker::dbhook
 		size_t size;
 		unsigned long long name;
 		unsigned long long ext;
+		unsigned long long lang;
 	};
 
 	typedef void (*db_file_replacer_t)(FileData*);
@@ -71,5 +72,5 @@ namespace pd2hook::tweaker::dbhook
 
 	bool file_exists(blt::idstring name, blt::idstring ext);
 
-	FileData find_file(blt::idstring name, blt::idstring ext);
+	FileData find_file(blt::idstring name, blt::idstring ext, blt::idstring lang);
 } // namespace pd2hook::tweaker::dbhook

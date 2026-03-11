@@ -528,7 +528,7 @@ bool pd2hook::tweaker::dbhook::file_exists(blt::idstring name, blt::idstring ext
 	return file != nullptr;
 }
 
-pd2hook::tweaker::dbhook::FileData pd2hook::tweaker::dbhook::find_file(blt::idstring name, blt::idstring ext)
+pd2hook::tweaker::dbhook::FileData pd2hook::tweaker::dbhook::find_file(blt::idstring name, blt::idstring ext, blt::idstring lang)
 {
 	DslFile* file = DieselDB::Instance()->Find(name, ext);
 
@@ -546,6 +546,15 @@ pd2hook::tweaker::dbhook::FileData pd2hook::tweaker::dbhook::find_file(blt::idst
 #else
 		abort();
 #endif
+	}
+
+	for (DslFile* fi = file; fi; fi = fi->next)
+	{
+		if (fi->langId == lang || lang == 0)
+		{
+			file = fi;
+			break;
+		}
 	}
 
 	std::ifstream stream(file->bundle->path, std::ios::binary);
@@ -576,6 +585,7 @@ pd2hook::tweaker::dbhook::FileData pd2hook::tweaker::dbhook::find_file(blt::idst
 		data.size(),
 		name,
 		ext,
+		file->langId
 	};
 
 	return fd;
