@@ -4,6 +4,12 @@ This lists the changes between different versions of the SuperBLT DLL,
 the changes for the basemod are listed in their own changelog.
 Contributors other than maintainers are listed in parenthesis after specific changes.
 
+## Version 3.4.1
+- Added extra functionality to read language specific files (steam-test1)
+- Added functionality to load custom soundbanks (HW12Dev)
+- Fixed a potential stack corruption (HW12Dev)
+- Improved wren error message clarity (vojin154)
+
 ## Version 3.4.0
 - Updated to use absolute paths to fix issues with mod organizer (ZNix)
 
