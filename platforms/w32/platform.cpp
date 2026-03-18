@@ -93,6 +93,13 @@ static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char fr
 	return ret;
 }
 
+class Application_VR
+{
+  public:
+	virtual ~Application_VR() = 0;
+	char padding[0x198];
+	lua_State** _lua_L;
+};
 class Application
 {
   public:
@@ -104,7 +111,25 @@ class Application
 	{
 		subhook::ScopedHookRemove scoped_remove(&applicationUpdateDetour);
 
-		lua_State* L_ = *this->_lua_L;
+		static bool first_run = false;
+		static bool is_vr = false;
+		if (!first_run)
+		{
+			first_run = true;
+			is_vr = pd2hook::Util::IsVr(); // cache value to avoid string compare every update
+		}
+
+
+		lua_State* L_ = nullptr;
+		if (is_vr)
+		{
+			L_ = *((Application_VR*)this)->_lua_L;
+		}
+		else
+		{
+			L_ = *this->_lua_L;
+		}
+
 
 		blt::lua_functions::update(L_);
 
