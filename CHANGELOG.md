@@ -4,6 +4,9 @@ This lists the changes between different versions of the SuperBLT DLL,
 the changes for the basemod are listed in their own changelog.
 Contributors other than maintainers are listed in parenthesis after specific changes.
 
+## Version 3.4.2
+- Fixed crash of VR version of the game (HW12Dev)
+
 ## Version 3.4.1
 - Added extra functionality to read language specific files (steam-test1)
 - Added functionality to load custom soundbanks (HW12Dev)
