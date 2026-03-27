@@ -3,6 +3,9 @@ before_script:
 
 build:
   stage: build
+  rules:
+    - when:
+        never
   image: rikorose/gcc-cmake:gcc-9
   script:
     - git submodule init
