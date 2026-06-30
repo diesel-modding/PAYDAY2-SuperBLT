@@ -19,6 +19,10 @@
 #include "luautil/LuaAsyncIO.h"
 #include "dbutil/DB.h"
 
+#ifdef ENABLE_XAUDIO
+#include "xaudio/XAudio.h"
+#endif
+
 #include <format>
 #include <thread>
 #include <list>
@@ -1011,6 +1015,9 @@ namespace blt
 
 #ifdef ENABLE_DEBUG
 			DebugConnection::AddGlobals(L);
+#endif
+#ifdef ENABLE_XAUDIO
+			xaudio::XAudio::Register(L);
 #endif
 
 			for (plugins::Plugin *plugin : plugins::GetPlugins())

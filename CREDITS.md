@@ -1,3 +1,8 @@
+- RAID-SuperBLT Team
+	* [shinrax2](https://github.com/shinrax2)
+	* [BangL](https://github.com/BangL)
+	* Cryfact
+	* [HW12Dev](https://github.com/HW12Dev)
 - SuperBLT Team
 	* [Campbell Suter](https://znix.xyz)
 	* [Hoppip](https://hoppip.at)
