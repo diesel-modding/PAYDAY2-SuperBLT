@@ -7,16 +7,17 @@ namespace sblt
 
 	class XAudio
 	{
-	public:
-		static void Register(void *state);
+	  public:
+		static void Register(void* state);
 
 		// Please don't use, for internal use only
 		static XAudio* GetXAudioInstance();
-	private:
+
+	  private:
 		XAudio();
 		~XAudio();
 	};
 
-};
+}; // namespace sblt
 
 #endif

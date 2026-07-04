@@ -110,8 +110,8 @@ class DBAssetHook
 static std::map<blt::idfile, std::shared_ptr<DBTargetFile>> overriddenFiles;
 
 WrenForeignMethodFn raidhook::tweaker::dbhook::bind_dbhook_method(WrenVM* vm, const char* module,
-                                                                 const char* class_name_s, bool is_static,
-                                                                 const char* signature_c)
+                                                                  const char* class_name_s, bool is_static,
+                                                                  const char* signature_c)
 {
 	if (std::string(module) != MODULE)
 		return nullptr;
@@ -169,7 +169,7 @@ WrenForeignMethodFn raidhook::tweaker::dbhook::bind_dbhook_method(WrenVM* vm, co
 }
 
 WrenForeignClassMethods raidhook::tweaker::dbhook::bind_dbhook_class([[maybe_unused]] WrenVM* vm, const char* module,
-                                                                    const char* class_name)
+                                                                     const char* class_name)
 {
 	// Since we're using our own factory methods, this should never be called
 	WrenForeignMethodFn fakeAllocate = [](WrenVM* vm) { abort(); };
@@ -309,8 +309,8 @@ static void wrenLoadAssetContents(WrenVM* vm)
 }
 
 bool raidhook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BLTAbstractDataStore** out_datastore,
-                                               int64_t* out_pos, int64_t* out_len, std::string& out_name,
-                                               bool fallback_mode)
+                                                int64_t* out_pos, int64_t* out_len, std::string& out_name,
+                                                bool fallback_mode)
 {
 	// First zero everything
 	*out_datastore = nullptr;
@@ -335,7 +335,8 @@ bool raidhook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, B
 	// TODO write to out_name somewhere
 
 	// Define these loading functions here, as we can use them either directly or after calling Wren
-	auto load_file = [&](const std::string& filename) {
+	auto load_file = [&](const std::string& filename)
+	{
 		BLTFileDataStore* ds = BLTFileDataStore::Open(filename);
 
 		if (!ds)
@@ -355,7 +356,8 @@ bool raidhook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, B
 		*out_len = ds->size();
 	};
 
-	auto load_bundle_item = [&](blt::idfile bundle_item) {
+	auto load_bundle_item = [&](blt::idfile bundle_item)
+	{
 		DslFile* file = DieselDB::Instance()->Find(bundle_item.name, bundle_item.ext);
 
 		// Abort if the file isn't found - most likely this would lead to a crash anyway since the RAID version

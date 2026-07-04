@@ -18,14 +18,13 @@ namespace raidhook
 
 		class ByteStream
 		{
-		public:
+		  public:
 			ByteStream(const std::string& path);
 
-			template<typename T>
-			T readType();
+			template <typename T> T readType();
 			std::string readString(int length);
 
-		private:
+		  private:
 			std::ifstream mainStream;
 		};
 
@@ -37,14 +36,15 @@ namespace raidhook
 			int uncompressedSize;
 		};
 
-		ByteStream::ByteStream(const std::string& path) : mainStream(path.c_str(), std::ifstream::binary) {}
+		ByteStream::ByteStream(const std::string& path) : mainStream(path.c_str(), std::ifstream::binary)
+		{
+		}
 
-		template<typename T>
-		T ByteStream::readType()
+		template <typename T> T ByteStream::readType()
 		{
 			T read;
 
-			mainStream.read(reinterpret_cast<char *>(&read), sizeof(T));
+			mainStream.read(reinterpret_cast<char*>(&read), sizeof(T));
 			return read;
 		}
 
@@ -68,7 +68,7 @@ namespace raidhook
 			inflateInit2(&stream, -MAX_WBITS);
 
 			stream.avail_in = compressedData.second.size();
-			stream.next_in = reinterpret_cast<unsigned char*>(const_cast<char *>(compressedData.second.data()));
+			stream.next_in = reinterpret_cast<unsigned char*>(const_cast<char*>(compressedData.second.data()));
 
 			std::unique_ptr<unsigned char[]> out(new unsigned char[compressedData.first + 1]);
 
@@ -78,13 +78,14 @@ namespace raidhook
 			inflate(&stream, Z_NO_FLUSH);
 			inflateEnd(&stream);
 
-			return std::string(reinterpret_cast<const char *>(out.get()), compressedData.first);
+			return std::string(reinterpret_cast<const char*>(out.get()), compressedData.first);
 		}
 
 		std::unique_ptr<ZIPFileData> ReadFile(ByteStream& mainStream)
 		{
 			auto fileHeader = mainStream.readType<int32_t>();
-			if (fileHeader != MagicFileHeader) return nullptr;
+			if (fileHeader != MagicFileHeader)
+				return nullptr;
 
 			// version needed
 			mainStream.readType<int16_t>();
@@ -119,7 +120,8 @@ namespace raidhook
 				newFile->decompressedData = std::move(compressedData);
 				break;
 			case 8: // Deflate
-				newFile->decompressedData = DecompressData(std::make_pair(newFile->uncompressedSize, std::move(compressedData)));
+				newFile->decompressedData =
+					DecompressData(std::make_pair(newFile->uncompressedSize, std::move(compressedData)));
 				break;
 			}
 
@@ -132,8 +134,8 @@ namespace raidhook
 			Util::EnsurePathWritable(finalWritePath);
 
 			// There doesn't seem to be a better way to detect if the "file" in question is a directory.
-			char trailingChar = finalWritePath.at(finalWritePath.size()-1);
-			if(trailingChar == '/' || trailingChar == '\\')
+			char trailingChar = finalWritePath.at(finalWritePath.size() - 1);
+			if (trailingChar == '/' || trailingChar == '\\')
 			{
 				// Ignore directories; They are created automatically when a file is written inside them.
 				return true;
@@ -153,7 +155,7 @@ namespace raidhook
 				return true;
 			}
 		}
-	}
+	} // namespace
 
 	bool ExtractZIPArchive(const std::string& path, const std::string& extractPath)
 	{
@@ -171,9 +173,7 @@ namespace raidhook
 		RAIDHOOK_LOG_LOG(std::string("Extracting ") + path + std::string(" to ") + extractPath);
 		bool result = true;
 		std::for_each(files.cbegin(), files.cend(), [extractPath, &result](const std::unique_ptr<ZIPFileData>& data)
-		{
-			result &= WriteFile(extractPath, *data);
-		});
+		              { result &= WriteFile(extractPath, *data); });
 		return result;
 	}
-}
+} // namespace raidhook

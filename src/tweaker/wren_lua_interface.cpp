@@ -63,8 +63,8 @@ static void wren_register_object(WrenVM* vm)
 }
 
 WrenForeignMethodFn raidhook::tweaker::lua_io::bind_wren_lua_method(WrenVM* vm, const char* module,
-                                                                   const char* class_name, bool is_static,
-                                                                   const char* signature)
+                                                                    const char* class_name, bool is_static,
+                                                                    const char* signature)
 {
 	if (strcmp(module, "base/native/LuaInterface_001") != 0)
 		return nullptr;

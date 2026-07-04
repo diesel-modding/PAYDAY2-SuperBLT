@@ -7,6 +7,6 @@ namespace raidhook
 	void DestroyStates();
 
 	bool check_active_state(void* L);
-}
+} // namespace raidhook
 
 #endif

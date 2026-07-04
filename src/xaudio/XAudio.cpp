@@ -15,7 +15,7 @@ namespace sblt
 		unordered_set<xasource::XASource*> openSources;
 
 		bool is_setup = false;
-	};
+	}; // namespace xaudio
 
 	using namespace xaudio;
 
@@ -49,7 +49,8 @@ namespace sblt
 	}
 	void XAResource::Close()
 	{
-		if (!valid) return;
+		if (!valid)
+			return;
 		valid = false;
 
 		// Actually close the resource
@@ -58,24 +59,26 @@ namespace sblt
 	}
 
 	// XALuaHandle
-	XALuaHandle::XALuaHandle(XAResource *resource) : resource(resource)
+	XALuaHandle::XALuaHandle(XAResource* resource) : resource(resource)
 	{
 		resource->Employ();
 	}
-	ALuint XALuaHandle::Handle(lua_State *L)
+	ALuint XALuaHandle::Handle(lua_State* L)
 	{
-		if (!open) luaL_error(L, "Cannot use closed resource!");
+		if (!open)
+			luaL_error(L, "Cannot use closed resource!");
 		return resource->Handle();
 	}
 	void XALuaHandle::Close(bool force)
 	{
-		if (!open) return;
+		if (!open)
+			return;
 
 		resource->Discard(force);
 		open = false;
 	}
 
-	static int lX_setup(lua_State *L)
+	static int lX_setup(lua_State* L)
 	{
 		try
 		{
@@ -91,25 +94,25 @@ namespace sblt
 		return 1;
 	}
 
-	static int lX_issetup(lua_State *L)
+	static int lX_issetup(lua_State* L)
 	{
 		lua_pushboolean(L, is_setup);
 		return 1;
 	}
 
-	static int lX_reset(lua_State *L)
+	static int lX_reset(lua_State* L)
 	{
 		reset_cleanup();
 		return 0;
 	}
 
-	static int lX_getworldscale(lua_State *L)
+	static int lX_getworldscale(lua_State* L)
 	{
 		lua_pushnumber(L, world_scale);
 		return 1;
 	}
 
-	static int lX_setworldscale(lua_State *L)
+	static int lX_setworldscale(lua_State* L)
 	{
 		world_scale = lua_tonumber(L, 1);
 		return 0;
@@ -117,13 +120,11 @@ namespace sblt
 
 	XAudio::XAudio()
 	{
-		ALCint attributes[] = {
-			/* Disable HRTF */
-			ALC_HRTF_SOFT, ALC_FALSE,
+		ALCint attributes[] = {/* Disable HRTF */
+		                       ALC_HRTF_SOFT, ALC_FALSE,
 
-			/* end of list */
-			0
-		};
+		                       /* end of list */
+		                       0};
 
 		dev = alcOpenDevice(NULL);
 		if (!dev)
@@ -152,7 +153,7 @@ namespace sblt
 		// Delete all buffers
 		for (auto const& pair : openBuffers)
 		{
-			xabuffer::XABuffer *buff = pair.second;
+			xabuffer::XABuffer* buff = pair.second;
 
 			buff->Close();
 
@@ -183,73 +184,64 @@ namespace sblt
 		return &audio;
 	}
 
-	void XAudio::Register(void * state)
+	void XAudio::Register(void* state)
 	{
-		lua_State *L = (lua_State*)state;
+		lua_State* L = (lua_State*)state;
 
 		// Buffer metatable
-		luaL_Reg XABufferLib[] =
-		{
-			{ "close", xabuffer::XABuffer_Close },
-			{ "getsamplecount", xabuffer::XABuffer_GetSampleCount },
-			{ "getsamplerate", xabuffer::XABuffer_GetSampleRate },
-			{ NULL, NULL }
-		};
+		luaL_Reg XABufferLib[] = {{"close", xabuffer::XABuffer_Close},
+		                          {"getsamplecount", xabuffer::XABuffer_GetSampleCount},
+		                          {"getsamplerate", xabuffer::XABuffer_GetSampleRate},
+		                          {NULL, NULL}};
 
 		luaL_newmetatable(L, "XAudio.buffer");
 
 		lua_pushstring(L, "__index");
-		lua_pushvalue(L, -2);  /* pushes the metatable */
-		lua_settable(L, -3);  /* metatable.__index = metatable */
+		lua_pushvalue(L, -2); /* pushes the metatable */
+		lua_settable(L, -3); /* metatable.__index = metatable */
 
 		luaL_openlib(L, NULL, XABufferLib, 0);
 		lua_pop(L, 1);
 
 		// Source metatable
-		luaL_Reg XASourceLib[] =
-		{
-			{ "close", xasource::XASource_Close },
-			{ "setbuffer", xasource::XASource_set_buffer },
-			{ "play", xasource::XASource_play },
-			{ "pause", xasource::XASource_pause },
-			{ "stop", xasource::XASource_stop },
-			{ "getstate", xasource::XASource_get_state },
-			{ "setposition", xasource::XASource_set_position },
-			{ "setvelocity", xasource::XASource_set_velocity },
-			{ "setdirection", xasource::XASource_set_direction },
+		luaL_Reg XASourceLib[] = {{"close", xasource::XASource_Close},
+		                          {"setbuffer", xasource::XASource_set_buffer},
+		                          {"play", xasource::XASource_play},
+		                          {"pause", xasource::XASource_pause},
+		                          {"stop", xasource::XASource_stop},
+		                          {"getstate", xasource::XASource_get_state},
+		                          {"setposition", xasource::XASource_set_position},
+		                          {"setvelocity", xasource::XASource_set_velocity},
+		                          {"setdirection", xasource::XASource_set_direction},
 
-			{ "setmindis", xasource::XASource_set_min_distance },
-			{ "setmaxdis", xasource::XASource_set_max_distance },
+		                          {"setmindis", xasource::XASource_set_min_distance},
+		                          {"setmaxdis", xasource::XASource_set_max_distance},
 
-			{ "getgain", xasource::XASource_get_gain },
-			{ "setgain", xasource::XASource_set_gain },
+		                          {"getgain", xasource::XASource_get_gain},
+		                          {"setgain", xasource::XASource_set_gain},
 
-			{ "setlooping", xasource::XASource_SetLooping },
-			{ "setrelative", xasource::XASource_SetRelative },
-			{ NULL, NULL }
-		};
+		                          {"setlooping", xasource::XASource_SetLooping},
+		                          {"setrelative", xasource::XASource_SetRelative},
+		                          {NULL, NULL}};
 
 		luaL_newmetatable(L, "XAudio.source");
 
 		lua_pushstring(L, "__index");
-		lua_pushvalue(L, -2);  /* pushes the metatable */
-		lua_settable(L, -3);  /* metatable.__index = metatable */
+		lua_pushvalue(L, -2); /* pushes the metatable */
+		lua_settable(L, -3); /* metatable.__index = metatable */
 
 		luaL_openlib(L, NULL, XASourceLib, 0);
 		lua_pop(L, 1);
 
 		// blt.xaudio table
-		luaL_Reg lib[] =
-		{
-			{ "setup", lX_setup },
-			{ "issetup", lX_issetup },
-			{ "reset", lX_reset },
-			{ "loadbuffer", xabuffer::lX_loadbuffer },
-			{ "newsource", xasource::lX_new_source },
-			{ "getworldscale", lX_getworldscale },
-			{ "setworldscale", lX_setworldscale },
-			{ NULL, NULL }
-		};
+		luaL_Reg lib[] = {{"setup", lX_setup},
+		                  {"issetup", lX_issetup},
+		                  {"reset", lX_reset},
+		                  {"loadbuffer", xabuffer::lX_loadbuffer},
+		                  {"newsource", xasource::lX_new_source},
+		                  {"getworldscale", lX_getworldscale},
+		                  {"setworldscale", lX_setworldscale},
+		                  {NULL, NULL}};
 
 		// Grab the BLT table
 		lua_getglobal(L, "blt");
@@ -270,6 +262,6 @@ namespace sblt
 		lua_pop(L, 1);
 	}
 
-}
+} // namespace sblt
 
 #endif // ENABLE_XAUDIO

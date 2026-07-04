@@ -12,19 +12,23 @@ namespace blt
 
 	class idfile
 	{
-	public:
-		idfile() : name(idstring_none), ext(idstring_none) {}
-		idfile(idstring name, idstring ext) : name(name), ext(ext) {}
+	  public:
+		idfile() : name(idstring_none), ext(idstring_none)
+		{
+		}
+		idfile(idstring name, idstring ext) : name(name), ext(ext)
+		{
+		}
 		idstring name;
 		idstring ext;
 
-		inline bool operator ==(const idfile &other) const
+		inline bool operator==(const idfile& other) const
 		{
 			return other.name == name && other.ext == ext;
 		}
 
 		// Required for std::less to function on Windows
-		inline bool operator < (const idfile &other) const
+		inline bool operator<(const idfile& other) const
 		{
 			return (name != other.name) ? name < other.name : ext < other.ext;
 		}
@@ -42,18 +46,18 @@ namespace blt
 		void InitPlatform();
 		void ClosePlatform();
 
-		void GetPlatformInformation(lua_State *L);
+		void GetPlatformInformation(lua_State* L);
 
 		namespace lua
 		{
 			bool GetForcePCalls();
 			void SetForcePCalls(bool);
-		};
+		}; // namespace lua
 
 		namespace win32
 		{
 			void OpenConsole();
 			void* get_lua_func(const char* name);
-		};
-	};
-};
+		}; // namespace win32
+	}; // namespace platform
+}; // namespace blt

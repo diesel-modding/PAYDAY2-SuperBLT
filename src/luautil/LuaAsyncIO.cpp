@@ -58,7 +58,8 @@ static void invoke_on_update(lua_State* L, std::function<void()> func)
 
 	// NOLINTNEXTLINE(performance-unnecessary-value-param)
 	GetCompletionsQueue().AddToQueue(
-		[](IOCompletion completion) {
+		[](IOCompletion completion)
+		{
 			if (!raidhook::check_active_state(completion.L))
 				return;
 
@@ -85,33 +86,35 @@ static void start_task_thread()
 
 	RAIDHOOK_LOG_LOG("Starting async IO thread");
 
-	std::thread thread([]() {
-		while (true)
+	std::thread thread(
+		[]()
 		{
-			// Try and get a task, or timeout
-			// The timeout ensures that we don't hold a bunch of threads if we're not using them
-			IOTask task;
-			const auto timeout = std::chrono::milliseconds(500);
+			while (true)
 			{
-				std::unique_lock lock(task_mutex);
-				bool has_item = condition_var.wait_for(lock, timeout, []() { return !task_list.empty(); });
-				if (!has_item)
-					break;
-				task = std::move(task_list.front());
-				task_list.pop();
+				// Try and get a task, or timeout
+			    // The timeout ensures that we don't hold a bunch of threads if we're not using them
+				IOTask task;
+				const auto timeout = std::chrono::milliseconds(500);
+				{
+					std::unique_lock lock(task_mutex);
+					bool has_item = condition_var.wait_for(lock, timeout, []() { return !task_list.empty(); });
+					if (!has_item)
+						break;
+					task = std::move(task_list.front());
+					task_list.pop();
+				}
+
+				// Execute this task
+				task.func();
 			}
 
-			// Execute this task
-			task.func();
-		}
+			RAIDHOOK_LOG_LOG("Exiting async IO thread");
 
-		RAIDHOOK_LOG_LOG("Exiting async IO thread");
-
-		{
-			std::lock_guard guard(task_mutex);
-			thread_count--;
-		}
-	});
+			{
+				std::lock_guard guard(task_mutex);
+				thread_count--;
+			}
+		});
 	thread.detach();
 }
 
@@ -146,49 +149,53 @@ static int aio_read(lua_State* L)
 	lua_pushvalue(L, 2);
 	int completion_func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-	dispatch_task([filename, completion_func_ref, L]() {
-		std::vector<char> data;
-		bool success = true;
-
-		// Since there's more steps involved with seeking around to find the length, just use
-		// exceptions for this rather than checking goodbit.
-		errno = 0; // Make sure pre-existing errors can't leak in
-		try
+	dispatch_task(
+		[filename, completion_func_ref, L]()
 		{
-			std::ifstream stream;
-			stream.exceptions(std::ios::eofbit | std::ios::failbit);
-			stream.open(filename, std::ios::binary);
+			std::vector<char> data;
+			bool success = true;
 
-			stream.seekg(0, std::ios::end);
-			size_t length = stream.tellg();
-			stream.seekg(0, std::ios::beg);
-
-			data.resize(length);
-			stream.read(data.data(), data.size());
-		}
-		catch (const std::ios::failure& ex)
-		{
-			data.clear();
-			success = false;
-		}
-
-		invoke_on_update(L, [L, func_ref{completion_func_ref}, &data, success, err{errno}]() {
-			lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
-			if (success)
+			// Since there's more steps involved with seeking around to find the length, just use
+		    // exceptions for this rather than checking goodbit.
+			errno = 0; // Make sure pre-existing errors can't leak in
+			try
 			{
-				lua_pushlstring(L, data.data(), data.size());
+				std::ifstream stream;
+				stream.exceptions(std::ios::eofbit | std::ios::failbit);
+				stream.open(filename, std::ios::binary);
+
+				stream.seekg(0, std::ios::end);
+				size_t length = stream.tellg();
+				stream.seekg(0, std::ios::beg);
+
+				data.resize(length);
+				stream.read(data.data(), data.size());
+			}
+			catch (const std::ios::failure& ex)
+			{
 				data.clear();
-				handled_pcall(L, 1, 0);
+				success = false;
 			}
-			else
-			{
-				lua_pushnil(L);
-				lua_pushstring(L, strerror(err));
-				handled_pcall(L, 2, 0);
-			}
-			luaL_unref(L, LUA_REGISTRYINDEX, func_ref);
+
+			invoke_on_update(L,
+		                     [L, func_ref{completion_func_ref}, &data, success, err{errno}]()
+		                     {
+								 lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
+								 if (success)
+								 {
+									 lua_pushlstring(L, data.data(), data.size());
+									 data.clear();
+									 handled_pcall(L, 1, 0);
+								 }
+								 else
+								 {
+									 lua_pushnil(L);
+									 lua_pushstring(L, strerror(err));
+									 handled_pcall(L, 2, 0);
+								 }
+								 luaL_unref(L, LUA_REGISTRYINDEX, func_ref);
+							 });
 		});
-	});
 
 	return 0;
 }
@@ -208,30 +215,34 @@ static int aio_write(lua_State* L)
 	lua_pushvalue(L, 3);
 	int completion_func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-	dispatch_task([filename, contents{std::move(contents)}, completion_func_ref, L]() {
-		errno = 0; // Make sure pre-existing errors can't leak in
+	dispatch_task(
+		[filename, contents{std::move(contents)}, completion_func_ref, L]()
+		{
+			errno = 0; // Make sure pre-existing errors can't leak in
 
-		std::ofstream stream;
-		if (stream.good())
-			stream.open(filename, std::ios::binary);
-		if (stream.good())
-			stream.write(contents.data(), contents.size());
+			std::ofstream stream;
+			if (stream.good())
+				stream.open(filename, std::ios::binary);
+			if (stream.good())
+				stream.write(contents.data(), contents.size());
 
-		invoke_on_update(L, [L, func_ref{completion_func_ref}, status{stream.good()}, err{errno}]() {
-			lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
-			lua_pushboolean(L, status);
-			if (status)
-			{
-				handled_pcall(L, 1, 0);
-			}
-			else
-			{
-				lua_pushstring(L, strerror(err));
-				handled_pcall(L, 2, 0);
-			}
-			luaL_unref(L, LUA_REGISTRYINDEX, func_ref);
+			invoke_on_update(L,
+		                     [L, func_ref{completion_func_ref}, status{stream.good()}, err{errno}]()
+		                     {
+								 lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
+								 lua_pushboolean(L, status);
+								 if (status)
+								 {
+									 handled_pcall(L, 1, 0);
+								 }
+								 else
+								 {
+									 lua_pushstring(L, strerror(err));
+									 handled_pcall(L, 2, 0);
+								 }
+								 luaL_unref(L, LUA_REGISTRYINDEX, func_ref);
+							 });
 		});
-	});
 
 	return 0;
 }

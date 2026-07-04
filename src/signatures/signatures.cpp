@@ -4,11 +4,11 @@
 #include <Psapi.h>
 // clang-format on
 
+#include "subhook.h"
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <tlhelp32.h>
-#include "subhook.h"
 
 #define SIG_INCLUDE_MAIN
 #define INCLUDE_TRY_OPEN_FUNCTIONS
@@ -153,8 +153,8 @@ static MODULEINFO GetModuleInfo(string szModule)
 	return modinfo;
 }
 
-static bool CheckSignature(const char* pattern, size_t patternLength, const char* mask, size_t base, size_t size, size_t i,
-                           size_t* result)
+static bool CheckSignature(const char* pattern, size_t patternLength, const char* mask, size_t base, size_t size,
+                           size_t i, size_t* result)
 {
 	bool found = true;
 	for (size_t j = 0; j < patternLength; j++)
@@ -172,7 +172,7 @@ static bool CheckSignature(const char* pattern, size_t patternLength, const char
 }
 
 static size_t FindPattern(char* module, const char* funcname, const char* pattern, const char* mask, size_t hint,
-                   bool* hintCorrect, size_t* hintOut)
+                          bool* hintCorrect, size_t* hintOut)
 {
 	*hintOut = NULL;
 
@@ -208,7 +208,7 @@ static size_t FindPattern(char* module, const char* funcname, const char* patter
 				if (correct)
 				{
 					string err = string("Found duplicate signature for ") + string(funcname) + string(" at ") +
-								 to_string(result) + string(",") + to_string(addr);
+					             to_string(result) + string(",") + to_string(addr);
 					RAIDHOOK_LOG_WARN(err);
 					hintOut = NULL; // Don't cache sigs with errors
 				}
@@ -233,9 +233,8 @@ static bool FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 	// to avoid breaking when an update comes out. Since we treat them all the same anyway - we hook them
 	// and run the same custom asset loading code - we don't really care which one is which, we just need
 	// all of them.
-	const char* pattern =
-		"\x48\x89\x54\x24\x10\x55\x53\x56\x57\x41\x54\x41\x56\x41\x57\x48\x8D"
-		"\x6C\x24\xE9\x48\x81\xEC\xE0\x00\x00\x00\x49";
+	const char* pattern = "\x48\x89\x54\x24\x10\x55\x53\x56\x57\x41\x54\x41\x56\x41\x57\x48\x8D"
+						  "\x6C\x24\xE9\x48\x81\xEC\xE0\x00\x00\x00\x49";
 	const char* mask = "xxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 	// There should be three copies of this function
 	int target_count = 3;
@@ -289,16 +288,17 @@ static bool FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache,
 		if (result == (size_t)try_open_property_match_resolver)
 		{
 			RAIDHOOK_LOG_LOG(string("Asset loading signature (") + hex_address.str() +
-			                string(") matched 'try_open_property_match_resolver' (") + hex_address.str() +
-			                string(") ignoring..."));
+			                 string(") matched 'try_open_property_match_resolver' (") + hex_address.str() +
+			                 string(") ignoring..."));
 
 			continue;
 		}
 
 		cache.UpdateAddress("asset_load_signatures_id_" + to_string(results.size()), i);
 		results.push_back((void*)result);
-		
-		RAIDHOOK_LOG_LOG(string("Found signature #") + to_string(results.size()) + string(" for asset loading at ") + hex_address.str());
+
+		RAIDHOOK_LOG_LOG(string("Found signature #") + to_string(results.size()) + string(" for asset loading at ") +
+		                 hex_address.str());
 	}
 
 	cache.UpdateAddress("asset_load_signatures_count", results.size());
@@ -384,7 +384,7 @@ bool SignatureSearch::Search()
 		else if (!hintCorrect)
 		{
 			RAIDHOOK_LOG_WARN(string("Sigcache for function ") + funcname + " incorrect (" + to_string(hint) + " vs " +
-			                 to_string(hintOut) + ")!");
+			                  to_string(hintOut) + ")!");
 		}
 
 		if (!hintCorrect && hintOut != NULL)
@@ -399,14 +399,15 @@ bool SignatureSearch::Search()
 	}
 
 	int asset_cache_misses = 0;
-	if (!FindAssetLoadSignatures(filename, cache, &asset_cache_misses) && !hasError) hasError = true;
+	if (!FindAssetLoadSignatures(filename, cache, &asset_cache_misses) && !hasError)
+		hasError = true;
 	cacheMisses += asset_cache_misses;
 
 	unsigned long ms_end = GetTickCount64();
 
 	RAIDHOOK_LOG_LOG(string("Scanned for ") + to_string(allSignatures->size()) + string(" signatures in ") +
-	                to_string((int)(ms_end - ms_start)) + string(" milliseconds with ") + to_string(cacheMisses) +
-	                string(" cache misses"));
+	                 to_string((int)(ms_end - ms_start)) + string(" milliseconds with ") + to_string(cacheMisses) +
+	                 string(" cache misses"));
 
 	if (cacheMisses > 0)
 	{

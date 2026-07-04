@@ -30,7 +30,8 @@ namespace raidhook
 		{
 			int finalSlash = path.find_last_of('/');
 			std::string finalPath = path.substr(0, finalSlash);
-			if (DirectoryExists(finalPath)) return;
+			if (DirectoryExists(finalPath))
+				return;
 			CreateDirectoryPath(finalPath);
 		}
 
@@ -78,7 +79,7 @@ namespace raidhook
 			return true;
 		}
 
-		void SplitString(const std::string &s, char delim, std::vector<std::string> &elems)
+		void SplitString(const std::string& s, char delim, std::vector<std::string>& elems)
 		{
 			std::istringstream ss(s);
 			std::string item;
@@ -91,12 +92,12 @@ namespace raidhook
 			}
 		}
 
-		std::vector<std::string> SplitString(const std::string &s, char delim)
+		std::vector<std::string> SplitString(const std::string& s, char delim)
 		{
 			std::vector<std::string> elems;
 			SplitString(s, delim, elems);
 			return elems;
 		}
 
-	}
-}
+	} // namespace Util
+} // namespace raidhook

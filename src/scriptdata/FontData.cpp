@@ -10,7 +10,7 @@ typedef uint32_t ptr_t;
 
 struct data_t
 {
-	const uint8_t *data;
+	const uint8_t* data;
 	size_t length;
 
 	size_t offset;
@@ -22,26 +22,24 @@ static_assert(sizeof(glyph) == 10, "Glyph is of the incorrect size");
 static_assert(sizeof(kerning) == 12, "kerning is of the incorrect size");
 static_assert(sizeof(char_def) == 8, "char_def is of the incorrect size");
 
-template<typename T>
-static T read(data_t &data)
+template <typename T> static T read(data_t& data)
 {
 	assert(data.offset + sizeof(T) <= data.length);
 
-	T val = *(T*) (data.data+data.offset);
+	T val = *(T*)(data.data + data.offset);
 	data.offset += sizeof(T);
 	return val;
 }
 
-static ptr_t readPtr(data_t &data)
+static ptr_t readPtr(data_t& data)
 {
-	if(data.is32bit)
+	if (data.is32bit)
 		return read<uint32_t>(data);
 	else
 		return read<uint64_t>(data);
 }
 
-template<typename T>
-static void readVec(data_t &data, std::vector<T> &out)
+template <typename T> static void readVec(data_t& data, std::vector<T>& out)
 {
 	int size = read<uint32_t>(data);
 	/* int capacity = */ read<uint32_t>(data);
@@ -51,28 +49,28 @@ static void readVec(data_t &data, std::vector<T> &out)
 
 	out.resize(size);
 
-	const T* contents = (const T*) &data.data[contents_offset];
+	const T* contents = (const T*)&data.data[contents_offset];
 	std::copy(contents, contents + size, out.begin());
 }
 
-bool FontData::is32bit(const std::string &data)
+bool FontData::is32bit(const std::string& data)
 {
-	if(data.length() < 50)
+	if (data.length() < 50)
 	{
 		// TODO throw error properly
 		abort();
 	}
 
-	const uint32_t *ints = (const uint32_t*) data.c_str();
+	const uint32_t* ints = (const uint32_t*)data.c_str();
 
 	// If the glyphs and codepoints match up in the correct locations, this is a 32-bit file
 	return ints[0] == ints[5] && ints[1] == ints[6];
 }
 
-FontData::FontData(const std::string &data)
+FontData::FontData(const std::string& data)
 {
 	data_t d = {};
-	d.data = (const uint8_t*) data.c_str();
+	d.data = (const uint8_t*)data.c_str();
 	d.length = data.length();
 	d.offset = 0;
 
@@ -91,7 +89,7 @@ FontData::FontData(const std::string &data)
 	d.offset += d.is32bit ? 3 : 7;
 
 	readPtr(d); // An allocator, probably for the string
-	name = (const char*) (d.data + readPtr(d)); // The name of the font
+	name = (const char*)(d.data + readPtr(d)); // The name of the font
 	// printf("%s\n", name.c_str());
 
 	size = read<uint32_t>(d);
@@ -109,13 +107,12 @@ FontData::FontData(const std::string &data)
 	assert(d.offset == (d.is32bit ? 96 : 144));
 }
 
-template<typename T>
-static void write_to_block(write_block &blk, const T &item)
+template <typename T> static void write_to_block(write_block& blk, const T& item)
 {
-	blk.stream().write((const char*) &item, sizeof(item));
+	blk.stream().write((const char*)&item, sizeof(item));
 }
 
-static uint32_t write_vec(write_block &blk, bool is32bit, uint32_t size)
+static uint32_t write_vec(write_block& blk, bool is32bit, uint32_t size)
 {
 	write_to_block<uint32_t>(blk, size); // size
 	write_to_block<uint32_t>(blk, size); // capacity
@@ -133,19 +130,19 @@ std::string FontData::Export(bool is32bit)
 	std::stringstream out;
 
 	write_block glyphs_b;
-	for(const glyph &g : glyphs)
+	for (const glyph& g : glyphs)
 	{
 		write_to_block(glyphs_b, g);
 	}
 
 	write_block codepoints_b;
-	for(const char_def &c : codepoints)
+	for (const char_def& c : codepoints)
 	{
 		write_to_block(codepoints_b, c);
 	}
 
 	write_block kernings_b;
-	for(const kerning &k : kernings)
+	for (const kerning& k : kernings)
 	{
 		write_to_block(kernings_b, k);
 	}
@@ -161,14 +158,14 @@ std::string FontData::Export(bool is32bit)
 	uint32_t codepoints_p = write_vec(main_b, is32bit, codepoints.size());
 	writePtr(main_b, is32bit, 0xEFBEADDE); // unused
 	writePtr(main_b, is32bit, 0xEFBEADDE); // unused
-	uint32_t kernings_p  = write_vec(main_b, is32bit, kernings.size());
+	uint32_t kernings_p = write_vec(main_b, is32bit, kernings.size());
 
 	write_to_block<uint8_t>(main_b, ukn_bool);
 
 	// Pad out to align the allocator
 	{
 		uint64_t tmp_zero = 0;
-		main_b.stream().write((const char*) &tmp_zero, is32bit ? 3 : 7);
+		main_b.stream().write((const char*)&tmp_zero, is32bit ? 3 : 7);
 	}
 
 	writePtr(main_b, is32bit, 0xEFBEADDE); // An allocator, probably for the string

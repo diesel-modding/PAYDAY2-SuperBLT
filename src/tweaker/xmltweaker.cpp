@@ -1,19 +1,19 @@
 #include "global.h"
-#include "xmltweaker_internal.h"
-#include <stdio.h>
-#include <fstream>
-#include <unordered_set>
-#include <set>
-#include <string.h>
 #include "util/util.h"
+#include "xmltweaker_internal.h"
+#include <fstream>
+#include <set>
+#include <stdio.h>
+#include <string.h>
+#include <unordered_set>
 
 #include <wren.hpp>
 
 using namespace std;
 using namespace raidhook;
 using namespace tweaker;
-using blt::idstring;
 using blt::idfile;
+using blt::idstring;
 
 bool raidhook::tweaker::tweaker_enabled = true;
 
@@ -42,9 +42,8 @@ char* tweaker::tweak_raid_xml(char* text, int text_length)
 	last_parsed = file;
 
 	// Don't bother with .model or .texture files
-	if (
-	    file.ext == 0xaf612bbc207e00bd ||	// idstring("model")
-	    file.ext == 0x5368e150b05a5b8c		// idstring("texture")
+	if (file.ext == 0xaf612bbc207e00bd || // idstring("model")
+	    file.ext == 0x5368e150b05a5b8c // idstring("texture")
 	)
 	{
 		return text;
@@ -59,7 +58,8 @@ char* tweaker::tweak_raid_xml(char* text, int text_length)
 	const char* new_text = transform_file(text);
 
 	// If the text is not to be altered, we can return it as is.
-	if (new_text == text) return text;
+	if (new_text == text)
+		return text;
 
 	// Otherwise, copy it so it's not invalidated by another Wren call
 
@@ -70,22 +70,22 @@ char* tweaker::tweak_raid_xml(char* text, int text_length)
 
 	portable_strncpy(buffer, new_text, length);
 
-	//if (!strncmp(new_text, "<network>", 9)) {
+	// if (!strncmp(new_text, "<network>", 9)) {
 	//	std::ofstream out("output.txt");
 	//	out << new_text;
 	//	out.close();
-	//}
+	// }
 
 	/*static int counter = 0;
 	if (counter++ == 1) {
-		printf("%s\n", buffer);
+	    printf("%s\n", buffer);
 
-		const int kMaxCallers = 62;
-		void* callers[kMaxCallers];
-		int count = CaptureStackBackTrace(0, kMaxCallers, callers, NULL);
-		for (int i = 0; i < count; i++)
-			printf("*** %d called from .text:%08X\n", i, callers[i]);
-		Sleep(20000);
+	    const int kMaxCallers = 62;
+	    void* callers[kMaxCallers];
+	    int count = CaptureStackBackTrace(0, kMaxCallers, callers, NULL);
+	    for (int i = 0; i < count; i++)
+	        printf("*** %d called from .text:%08X\n", i, callers[i]);
+	    Sleep(20000);
 	}*/
 
 	return (char*)buffer;

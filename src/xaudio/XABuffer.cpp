@@ -16,7 +16,7 @@ namespace sblt
 		alDeleteBuffers(1, &alhandle);
 	}
 
-	int xabuffer::lX_loadbuffer(lua_State *L)
+	int xabuffer::lX_loadbuffer(lua_State* L)
 	{
 		ALERR;
 
@@ -55,30 +55,25 @@ namespace sblt
 				// Load the contents of the buffer
 
 				int samples, channels, sampleRate;
-				short *data;
+				short* data;
 
-				samples = stb_vorbis_decode_filename(filename.c_str(),
-				                                     &channels,
-				                                     &sampleRate,
-				                                     &data);
+				samples = stb_vorbis_decode_filename(filename.c_str(), &channels, &sampleRate, &data);
 
 				// Find the relevent errors
-				if (samples == -1) luaL_error(L, "blt.xaudio.loadbuffer: FileNotFound %s", filename.c_str());
-				if (samples == -2) luaL_error(L, "blt.xaudio.loadbuffer: OutOfMemory");
+				if (samples == -1)
+					luaL_error(L, "blt.xaudio.loadbuffer: FileNotFound %s", filename.c_str());
+				if (samples == -2)
+					luaL_error(L, "blt.xaudio.loadbuffer: OutOfMemory");
 
 				// Copy the file into our buffer
 				// TODO do this in the background
-				alBufferData(buffers[i],
-				             channels == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16,
-				             data,
-				             samples * sizeof(short) * channels,
-				             sampleRate
-				            );
+				alBufferData(buffers[i], channels == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16, data,
+				             samples * sizeof(short) * channels, sampleRate);
 
 				free(data);
 
 				// Create the Lua object
-				XABuffer *buff = new XABuffer(buffers[i], filename, samples, sampleRate);
+				XABuffer* buff = new XABuffer(buffers[i], filename, samples, sampleRate);
 				*(XALuaHandle*)lua_newuserdata(L, sizeof(XALuaHandle)) = XALuaHandle(buff);
 
 				// Cache it
@@ -98,6 +93,6 @@ namespace sblt
 	XA_CLASS_LUA_CLOSE(xabuffer::XABuffer, lua_toboolean(L, 2));
 	XA_CLASS_LUA_METHOD(xabuffer::XABuffer, GetSampleCount, integer);
 	XA_CLASS_LUA_METHOD(xabuffer::XABuffer, GetSampleRate, integer);
-};
+}; // namespace sblt
 
 #endif

@@ -1,14 +1,14 @@
 #include <thread>
 
-#include "util.h"
-#include "threading/queue.h"
 #include "lua.h"
+#include "threading/queue.h"
+#include "util.h"
 
 using namespace std;
 
 struct HashInfo
 {
-	lua_State *L;
+	lua_State* L;
 	int ref;
 	string filename;
 	raidhook::Util::DirectoryHashFunction hasher;
@@ -21,10 +21,10 @@ RAIDHOOK_REGISTER_EVENTQUEUE(HashInfo, HashResult)
 
 class AsyncHashManager
 {
-private:
+  private:
 	AsyncHashManager();
 
-public:
+  public:
 	~AsyncHashManager();
 
 	static AsyncHashManager* GetSingleton();
@@ -38,10 +38,7 @@ AsyncHashManager::AsyncHashManager()
 
 AsyncHashManager::~AsyncHashManager()
 {
-	for_each(threadList.begin(), threadList.end(), [](const unique_ptr<thread>& t)
-	{
-		t->join();
-	});
+	for_each(threadList.begin(), threadList.end(), [](const unique_ptr<thread>& t) { t->join(); });
 }
 
 AsyncHashManager* AsyncHashManager::GetSingleton()

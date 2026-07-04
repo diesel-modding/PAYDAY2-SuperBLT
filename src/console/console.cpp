@@ -1,15 +1,15 @@
-#include <windows.h>
-#include <conio.h>
-#include <FCNTL.H>
-#include <io.h>
 #include "console.h"
+#include <FCNTL.H>
+#include <conio.h>
+#include <io.h>
 #include <iostream>
+#include <windows.h>
 
 namespace
 {
 	class outbuf : public std::streambuf
 	{
-	public:
+	  public:
 		outbuf()
 		{
 			setp(0, 0);
@@ -22,8 +22,8 @@ namespace
 	};
 
 	outbuf obuf;
-	std::streambuf *sb = nullptr;
-}
+	std::streambuf* sb = nullptr;
+} // namespace
 static BOOL WINAPI MyConsoleCtrlHandler(DWORD dwCtrlEvent)
 {
 	return dwCtrlEvent == CTRL_C_EVENT;
@@ -31,12 +31,13 @@ static BOOL WINAPI MyConsoleCtrlHandler(DWORD dwCtrlEvent)
 
 CConsole::CConsole() : m_OwnConsole(false)
 {
-	if (!AllocConsole()) return;
+	if (!AllocConsole())
+		return;
 
 	SetConsoleCtrlHandler(MyConsoleCtrlHandler, TRUE);
 	RemoveMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
 
-	FILE *tmp;
+	FILE* tmp;
 	freopen_s(&tmp, "conout$", "w", stdout);
 	freopen_s(&tmp, "conout$", "w", stderr);
 	freopen_s(&tmp, "CONIN$", "r", stdin);

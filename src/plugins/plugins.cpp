@@ -13,9 +13,9 @@ namespace blt
 
 		list<Plugin*> plugins_list;
 
-		PluginLoadResult LoadPlugin(string file, Plugin **out_plugin)
+		PluginLoadResult LoadPlugin(string file, Plugin** out_plugin)
 		{
-			if(out_plugin)
+			if (out_plugin)
 				*out_plugin = NULL;
 
 			// Major TODO before this is publicly released as stable:
@@ -30,9 +30,9 @@ namespace blt
 			for (Plugin* plugin : plugins_list)
 			{
 				// TODO use some kind of ID or UUID embedded into the binary for identification, not filename
-				if(file == plugin->GetFile())
+				if (file == plugin->GetFile())
 				{
-					if(out_plugin)
+					if (out_plugin)
 						*out_plugin = plugin;
 
 					return plr_AlreadyLoaded;
@@ -43,13 +43,13 @@ namespace blt
 
 			try
 			{
-				Plugin *plugin = CreateNativePlugin(file);
+				Plugin* plugin = CreateNativePlugin(file);
 				plugins_list.push_back(plugin);
 
 				// Set up the already-running states
 				RegisterPluginForActiveStates(plugin);
 
-				if(out_plugin)
+				if (out_plugin)
 					*out_plugin = plugin;
 			}
 			catch (const char* err)
@@ -72,8 +72,9 @@ namespace blt
 		void Plugin::Init()
 		{
 			// Version compatibility.
-			uint64_t *SBLT_API_REVISION = (uint64_t*) ResolveSymbol("SBLT_API_REVISION");
-			if (!SBLT_API_REVISION) throw string("Missing export SBLT_API_REVISION");
+			uint64_t* SBLT_API_REVISION = (uint64_t*)ResolveSymbol("SBLT_API_REVISION");
+			if (!SBLT_API_REVISION)
+				throw string("Missing export SBLT_API_REVISION");
 
 			switch (*SBLT_API_REVISION)
 			{
@@ -81,20 +82,28 @@ namespace blt
 				// Nothing special for now.
 				break;
 			default:
-				throw string("Unsupported revision ") + to_string(*SBLT_API_REVISION) + " - you probably need to update SuperBLT";
+				throw string("Unsupported revision ") + to_string(*SBLT_API_REVISION) +
+					" - you probably need to update SuperBLT";
 			}
 
 			// Verify the licence compliance.
-			const char * const *MODULE_LICENCE_DECLARATION = (const char * const *)ResolveSymbol("MODULE_LICENCE_DECLARATION");
-			if (!MODULE_LICENCE_DECLARATION) throw string("Licence error: Missing export MODULE_LICENCE_DECLARATION");
+			const char* const* MODULE_LICENCE_DECLARATION =
+				(const char* const*)ResolveSymbol("MODULE_LICENCE_DECLARATION");
+			if (!MODULE_LICENCE_DECLARATION)
+				throw string("Licence error: Missing export MODULE_LICENCE_DECLARATION");
 
-			const char * const *MODULE_SOURCE_CODE_LOCATION = (const char * const *)ResolveSymbol("MODULE_SOURCE_CODE_LOCATION");
-			if (!MODULE_SOURCE_CODE_LOCATION) throw string("Licence error: Missing export MODULE_SOURCE_CODE_LOCATION");
+			const char* const* MODULE_SOURCE_CODE_LOCATION =
+				(const char* const*)ResolveSymbol("MODULE_SOURCE_CODE_LOCATION");
+			if (!MODULE_SOURCE_CODE_LOCATION)
+				throw string("Licence error: Missing export MODULE_SOURCE_CODE_LOCATION");
 
-			const char * const *MODULE_SOURCE_CODE_REVISION = (const char * const *)ResolveSymbol("MODULE_SOURCE_CODE_REVISION");
-			if (!MODULE_SOURCE_CODE_REVISION) throw string("Licence error: Missing export MODULE_SOURCE_CODE_REVISION");
+			const char* const* MODULE_SOURCE_CODE_REVISION =
+				(const char* const*)ResolveSymbol("MODULE_SOURCE_CODE_REVISION");
+			if (!MODULE_SOURCE_CODE_REVISION)
+				throw string("Licence error: Missing export MODULE_SOURCE_CODE_REVISION");
 
-			const char *required_declaration = "This module is licenced under the GNU GPL version 2 or later, or another compatible licence";
+			const char* required_declaration =
+				"This module is licenced under the GNU GPL version 2 or later, or another compatible licence";
 
 			if (strcmp(required_declaration, *MODULE_LICENCE_DECLARATION))
 			{
@@ -117,36 +126,38 @@ namespace blt
 				developer = true;
 			}
 
-			if(developer)
+			if (developer)
 			{
-				RAIDHOOK_LOG_WARN("Loading development plugin! This should never occur ourside a development enviornment");
+				RAIDHOOK_LOG_WARN(
+					"Loading development plugin! This should never occur ourside a development enviornment");
 			}
 
-			setup_state = (setup_state_func_t) ResolveSymbol("SuperBLT_Plugin_Init_State");
-			if (!setup_state) throw string("Invalid dlhandle - missing setup_state func!");
+			setup_state = (setup_state_func_t)ResolveSymbol("SuperBLT_Plugin_Init_State");
+			if (!setup_state)
+				throw string("Invalid dlhandle - missing setup_state func!");
 
-			update_func = (update_func_t) ResolveSymbol("SuperBLT_Plugin_Update");
-			push_lua = (push_lua_func_t) ResolveSymbol("SuperBLT_Plugin_PushLua");
+			update_func = (update_func_t)ResolveSymbol("SuperBLT_Plugin_Update");
+			push_lua = (push_lua_func_t)ResolveSymbol("SuperBLT_Plugin_PushLua");
 		}
 
-		void Plugin::AddToState(lua_State * L)
+		void Plugin::AddToState(lua_State* L)
 		{
 			setup_state(L);
 		}
 
-		void Plugin::Update(lua_State * L)
+		void Plugin::Update(lua_State* L)
 		{
 			if (update_func)
 				update_func(L);
 		}
 
-		int Plugin::PushLuaValue(lua_State * L)
+		int Plugin::PushLuaValue(lua_State* L)
 		{
-			if(!push_lua)
+			if (!push_lua)
 				return 0;
 
 			return push_lua(L);
 		}
 
-	}
-}
+	} // namespace plugins
+} // namespace blt

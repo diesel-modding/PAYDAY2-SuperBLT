@@ -1,12 +1,12 @@
-#include "tweaker/db_hooks.h"
 #include "dbutil/Datastore.h"
+#include "tweaker/db_hooks.h"
 
 #include "platform.h"
 #include "subhook.h"
 
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include <synchapi.h>
+#include <windows.h>
 
 using raidhook::tweaker::dbhook::hook_asset_load;
 
@@ -37,26 +37,31 @@ class PDString
 static_assert(sizeof(PDString) == 32 + sizeof(std::string), "PDString is the wrong size!");
 
 // The signature is the same for all try_open methods, so one typedef will work for all of them.
-typedef void(__thiscall* try_open_t)(void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, unsigned long long u2);
+typedef void(__thiscall* try_open_t)(void* this_, void* archive, blt::idstring* type, blt::idstring* name,
+                                     unsigned long long u1, unsigned long long u2);
 
-static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, unsigned long long u2);
+static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, blt::idstring* type,
+                      blt::idstring* name, unsigned long long u1, unsigned long long u2);
 
-#define DECLARE_PASSTHROUGH(func)                                                                                                                 \
-	static subhook::Hook hook_##func;                                                                                                               \
-	void stub_##func(void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, unsigned long long u2) \
-	{                                                                                                                                               \
-		hook_load((try_open_t)func, hook_##func, this_, archive, type, name, u1, u2);                                                                 \
+#define DECLARE_PASSTHROUGH(func)                                                                                 \
+	static subhook::Hook hook_##func;                                                                             \
+	void stub_##func(void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, \
+	                 unsigned long long u2)                                                                       \
+	{                                                                                                             \
+		hook_load((try_open_t)func, hook_##func, this_, archive, type, name, u1, u2);                             \
 	}
 
-#define DECLARE_PASSTHROUGH_ARRAY(id)                                                                                                           \
-	static subhook::Hook hook_##id;                                                                                                               \
-	void stub_##id(void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, unsigned long long u2) \
-	{                                                                                                                                             \
-		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, type, name, u1, u2);                                            \
+#define DECLARE_PASSTHROUGH_ARRAY(id)                                                                           \
+	static subhook::Hook hook_##id;                                                                             \
+	void stub_##id(void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, \
+	               unsigned long long u2)                                                                       \
+	{                                                                                                           \
+		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, type, name, u1, u2);        \
 	}
 
 // Approximate structure from IDA, zero idea how accurate it is, but we've got the important ones here.
-struct Archive {
+struct Archive
+{
 	char char0;
 	uint8_t gap1[15];
 	uint64_t qword10;
@@ -77,7 +82,8 @@ struct Archive {
 };
 
 // This got inlined in the latest build, so we have to recreate it ourselves.
-static void* Archive_ctor(Archive* archive, PDString* pd_name, BLTAbstractDataStore* datastore, int64_t pos, int64_t len, bool ukn)
+static void* Archive_ctor(Archive* archive, PDString* pd_name, BLTAbstractDataStore* datastore, int64_t pos,
+                          int64_t len, bool ukn)
 {
 	archive->position = pos;
 	archive->length = len;
@@ -85,7 +91,7 @@ static void* Archive_ctor(Archive* archive, PDString* pd_name, BLTAbstractDataSt
 	archive->word38 = ukn;
 	archive->qword40 = 0i64;
 
-	#pragma warning(suppress : 6031) // Complains about not using the return data.
+#pragma warning(suppress : 6031) // Complains about not using the return data.
 	InitializeCriticalSectionAndSpinCount(&archive->rtl_critical_section48, 0xFA0u);
 
 	archive->datastore = datastore;
@@ -96,7 +102,8 @@ static void* Archive_ctor(Archive* archive, PDString* pd_name, BLTAbstractDataSt
 	return archive;
 }
 
-static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, blt::idstring* type, blt::idstring* name, unsigned long long u1, unsigned long long u2)
+static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, blt::idstring* type,
+                      blt::idstring* name, unsigned long long u1, unsigned long long u2)
 {
 	// Try hooking this asset, and see if we need to handle it differently
 	BLTAbstractDataStore* datastore = nullptr;
@@ -109,11 +116,12 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 	if (found)
 	{
 		PDString pd_name(ds_name);
-		Archive_ctor((Archive*) archive, &pd_name, datastore, pos, len, false);
+		Archive_ctor((Archive*)archive, &pd_name, datastore, pos, len, false);
 		return;
 	}
 
-	if (*name == 185182019423013513u) {
+	if (*name == 185182019423013513u)
+	{
 		printf("camera stuff");
 	}
 
@@ -128,12 +136,14 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 		if (hook_asset_load(blt::idfile(*name, *type), &datastore, &pos, &len, ds_name, true))
 		{
 			PDString pd_name(ds_name);
-			Archive_ctor((Archive*) archive, &pd_name, datastore, pos, len, false);
+			Archive_ctor((Archive*)archive, &pd_name, datastore, pos, len, false);
 			return;
 		}
 	}
 }
 
-static void setup_extra_asset_hooks() {}
+static void setup_extra_asset_hooks()
+{
+}
 
 #define HOOK_OPTION subhook::HookOptions::HookOption64BitOffset

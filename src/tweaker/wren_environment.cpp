@@ -86,8 +86,8 @@ static void get_mod_directory_at_depth(WrenVM* vm)
 }
 
 WrenForeignMethodFn raidhook::tweaker::wren_env::bind_wren_env_method(WrenVM* vm, const char* module,
-                                                                     const char* className, bool isStatic,
-                                                                     const char* signature)
+                                                                      const char* className, bool isStatic,
+                                                                      const char* signature)
 {
 	if (strcmp(module, "base/native/Environment_001") == 0)
 	{

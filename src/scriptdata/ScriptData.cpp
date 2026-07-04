@@ -1,13 +1,13 @@
 #include "ScriptData.h"
 
-#include <functional>
 #include <cassert>
+#include <functional>
 
 // For the writer
-#include <sstream>
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <sstream>
 
 // Testing
 #include <chrono>
@@ -24,8 +24,7 @@ namespace raidhook::scriptdata
 
 	// static bool is32bit;
 
-	template<typename Ptr>
-	struct RawVec
+	template <typename Ptr> struct RawVec
 	{
 		unsigned int count;
 		unsigned int capacity;
@@ -33,15 +32,13 @@ namespace raidhook::scriptdata
 		Ptr ignore; // Allocator
 	};
 
-	template<typename Ptr>
-	struct RawStr
+	template <typename Ptr> struct RawStr
 	{
 		Ptr ignore; // Allocator
 		Ptr str;
 	};
 
-	template<typename Ptr>
-	struct RawTable
+	template <typename Ptr> struct RawTable
 	{
 		Ptr meta;
 		RawVec<Ptr> contents;
@@ -64,48 +61,45 @@ namespace raidhook::scriptdata
 
 	typedef uint32_t valid_t;
 
-	template<typename T>
-	struct VecInfo
+	template <typename T> struct VecInfo
 	{
 		size_t count;
-		T *items;
+		T* items;
 	};
 
-	template<typename T>
-	VecInfo<T> readVec(bool is32bit, const uint8_t *data, size_t &offset)
+	template <typename T> VecInfo<T> readVec(bool is32bit, const uint8_t* data, size_t& offset)
 	{
 		VecInfo<T> info = {};
 
-		if(is32bit)
+		if (is32bit)
 		{
-			RawVec32 &vec = *(RawVec32*) &data[offset];
+			RawVec32& vec = *(RawVec32*)&data[offset];
 			info.count = vec.count;
-			info.items = (T*) &data[vec.offset];
+			info.items = (T*)&data[vec.offset];
 			offset += sizeof(RawVec32);
 		}
 		else
 		{
-			RawVec64 &vec = *(RawVec64*) &data[offset];
+			RawVec64& vec = *(RawVec64*)&data[offset];
 			info.count = vec.count;
-			info.items = (T*) &data[vec.offset];
+			info.items = (T*)&data[vec.offset];
 			offset += sizeof(RawVec64);
 		}
 
 		return info;
 	}
 
-	template<typename from, typename to>
-	using Reader = std::function<void(const from&, to&)>;
+	template <typename from, typename to> using Reader = std::function<void(const from&, to&)>;
 
-	template<typename from, typename to>
-	void readIntoVec(bool is32bit, std::vector<to> &res, const uint8_t *data, size_t &offset, Reader<from, to> f)
+	template <typename from, typename to>
+	void readIntoVec(bool is32bit, std::vector<to>& res, const uint8_t* data, size_t& offset, Reader<from, to> f)
 	{
 		VecInfo<from> info = readVec<from>(is32bit, data, offset);
 
 		res.clear();
 		res.resize(info.count);
 
-		for(size_t i=0; i<info.count; i++)
+		for (size_t i = 0; i < info.count; i++)
 		{
 			f(info.items[i], res[i]);
 		}
@@ -115,25 +109,24 @@ namespace raidhook::scriptdata
 	{
 	}
 
-	template<typename T>
-	void numberList(std::vector<T> &items)
+	template <typename T> void numberList(std::vector<T>& items)
 	{
-		for(size_t i=0; i<items.size(); i++)
+		for (size_t i = 0; i < items.size(); i++)
 		{
 			items[i].index = i;
 		}
 	}
 
-	void ScriptData::ReadTable(STable &out, std::pair<valid_t, valid_t> *data, size_t count, uint32_t meta)
+	void ScriptData::ReadTable(STable& out, std::pair<valid_t, valid_t>* data, size_t count, uint32_t meta)
 	{
-		for(size_t i=0; i<count; i++)
+		for (size_t i = 0; i < count; i++)
 		{
-			const SItem *key = Read(data[i].first);
-			const SItem *val = Read(data[i].second);
+			const SItem* key = Read(data[i].first);
+			const SItem* val = Read(data[i].second);
 			out.items[key] = val;
 		}
 
-		if(meta != ~0u)
+		if (meta != ~0u)
 		{
 			out.meta = &strings[meta];
 		}
@@ -143,25 +136,31 @@ namespace raidhook::scriptdata
 		}
 	}
 
-	bool determine_is_32bit(size_t length, const uint8_t *data)
+	bool determine_is_32bit(size_t length, const uint8_t* data)
 	{
 		// The length of the 64-bit header
 		// Any file shorter than this MUST be a 32-bit file
 		const size_t header_len_64 = 8 + (6 * sizeof(RawVec64));
 
-		if(length < header_len_64)
+		if (length < header_len_64)
 			return true;
 
 		// See the format info file to see how this works
 
 		// For the purposes of finding out the pointer width, treat the data
 		//  as an integer array - the smaller units used in DslVector
-		const uint32_t *ints = (const uint32_t*) data;
+		const uint32_t* ints = (const uint32_t*)data;
 
 		// These macros check if the value at the given int position
-#define CHECK_ZERO_32(index) if(ints[index] != 0) return false
-#define CHECK_ZERO_64(index) if(ints[index] != 0) return true
-#define CHECK_ZERO_64_PTR(index) if(ints[index] != 0 || ints[index+1] != 0) return true
+#define CHECK_ZERO_32(index) \
+	if (ints[index] != 0)    \
+	return false
+#define CHECK_ZERO_64(index) \
+	if (ints[index] != 0)    \
+	return true
+#define CHECK_ZERO_64_PTR(index)                  \
+	if (ints[index] != 0 || ints[index + 1] != 0) \
+	return true
 
 		// Check the allocator slots are empty - if so, it's certainly not 64-bit
 		CHECK_ZERO_64_PTR(0);
@@ -180,7 +179,7 @@ namespace raidhook::scriptdata
 		return false;
 	}
 
-	ScriptData::ScriptData(size_t length, const uint8_t *data)
+	ScriptData::ScriptData(size_t length, const uint8_t* data)
 	{
 		bool is32bit = determine_is_32bit(length, data);
 
@@ -190,56 +189,47 @@ namespace raidhook::scriptdata
 		offset += is32bit ? 4 : 8;
 
 		static_assert(sizeof(float) == 4, "incompatible float size");
-		readIntoVec<float, SNum>(is32bit, numbers, data, offset, [](const float &in, SNum &out)
-		{
-			out = SNum(in);
-		});
+		readIntoVec<float, SNum>(is32bit, numbers, data, offset, [](const float& in, SNum& out) { out = SNum(in); });
 
-		if(is32bit)
+		if (is32bit)
 		{
-			readIntoVec<RawStr32, SString>(is32bit, strings, data, offset, [data](const RawStr32 &in, SString &out)
-			{
-				out = SString((const char*) &data[in.str]);
-			});
+			readIntoVec<RawStr32, SString>(is32bit, strings, data, offset, [data](const RawStr32& in, SString& out)
+			                               { out = SString((const char*)&data[in.str]); });
 		}
 		else
 		{
-			readIntoVec<RawStr64, SString>(is32bit, strings, data, offset, [data](const RawStr64 &in, SString &out)
-			{
-				out = SString((const char*) &data[in.str]);
-			});
+			readIntoVec<RawStr64, SString>(is32bit, strings, data, offset, [data](const RawStr64& in, SString& out)
+			                               { out = SString((const char*)&data[in.str]); });
 		}
 
-		readIntoVec<float[3], SVector>(is32bit, vectors, data, offset, [](const float (&in)[3], SVector &out)
-		{
-			out = SVector(in[0], in[1], in[2]);
-		});
+		readIntoVec<float[3], SVector>(is32bit, vectors, data, offset,
+		                               [](const float (&in)[3], SVector& out) { out = SVector(in[0], in[1], in[2]); });
 
-		readIntoVec<float[4], SQuaternion>(is32bit, quats, data, offset, [](const float (&in)[4], SQuaternion &out)
-		{
-			out = SQuaternion(in[0], in[1], in[2], in[3]);
-		});
+		readIntoVec<float[4], SQuaternion>(is32bit, quats, data, offset, [](const float (&in)[4], SQuaternion& out)
+		                                   { out = SQuaternion(in[0], in[1], in[2], in[3]); });
 
-		readIntoVec<uint64_t, SIdstring>(is32bit, idstrings, data, offset, [](const uint64_t &in, SIdstring &out)
-		{
-			out = SIdstring(in);
-		});
+		readIntoVec<uint64_t, SIdstring>(is32bit, idstrings, data, offset,
+		                                 [](const uint64_t& in, SIdstring& out) { out = SIdstring(in); });
 
-		if(is32bit)
+		if (is32bit)
 		{
-			readIntoVec<RawTable32, STable>(is32bit, tables, data, offset, [data, this](const RawTable32 &in, STable &out)
-			{
-				out = STable();
-				ReadTable(out, (std::pair<valid_t, valid_t>*) &data[in.contents.offset], in.contents.count, in.meta);
-			});
+			readIntoVec<RawTable32, STable>(is32bit, tables, data, offset,
+			                                [data, this](const RawTable32& in, STable& out)
+			                                {
+												out = STable();
+												ReadTable(out, (std::pair<valid_t, valid_t>*)&data[in.contents.offset],
+				                                          in.contents.count, in.meta);
+											});
 		}
 		else
 		{
-			readIntoVec<RawTable64, STable>(is32bit, tables, data, offset, [data, this](const RawTable64 &in, STable &out)
-			{
-				out = STable();
-				ReadTable(out, (std::pair<valid_t, valid_t>*) &data[in.contents.offset], in.contents.count, in.meta);
-			});
+			readIntoVec<RawTable64, STable>(is32bit, tables, data, offset,
+			                                [data, this](const RawTable64& in, STable& out)
+			                                {
+												out = STable();
+												ReadTable(out, (std::pair<valid_t, valid_t>*)&data[in.contents.offset],
+				                                          in.contents.count, in.meta);
+											});
 		}
 
 		numberList(numbers);
@@ -249,7 +239,7 @@ namespace raidhook::scriptdata
 		numberList(idstrings);
 		numberList(tables);
 
-		uint32_t *val = (uint32_t*) &data[offset];
+		uint32_t* val = (uint32_t*)&data[offset];
 		root = Read(*val);
 	}
 
@@ -258,7 +248,7 @@ namespace raidhook::scriptdata
 		uint8_t type = val >> 24;
 		uint32_t index = val & 0xFFFFFF;
 
-		switch(type)
+		switch (type)
 		{
 		case SNil::ID:
 			return &SNil::INSTANCE;
@@ -289,19 +279,21 @@ namespace raidhook::scriptdata
 
 	class SItem::write_info
 	{
-	public:
-		uint32_t IndexOf(const SItem *item, bool *added = nullptr)
+	  public:
+		uint32_t IndexOf(const SItem* item, bool* added = nullptr)
 		{
-			if(added) *added = false;
+			if (added)
+				*added = false;
 
-			std::map<const SItem*, int> &oftype_indexes = item_positions[item->GetId()];
+			std::map<const SItem*, int>& oftype_indexes = item_positions[item->GetId()];
 
 			auto existing_idx = oftype_indexes.find(item);
-			if (existing_idx != oftype_indexes.end()) {
+			if (existing_idx != oftype_indexes.end())
+			{
 				return existing_idx->second;
 			}
 
-			std::vector<const SItem*> &oftype = items[item->GetId()];
+			std::vector<const SItem*>& oftype = items[item->GetId()];
 
 			if (frozen)
 			{
@@ -311,11 +303,12 @@ namespace raidhook::scriptdata
 			int idx = oftype.size();
 			oftype_indexes[item] = idx;
 			oftype.push_back(item);
-			if (added) *added = true;
+			if (added)
+				*added = true;
 			return idx;
 		}
 
-		const std::vector<const SItem*> &ListOf(int id)
+		const std::vector<const SItem*>& ListOf(int id)
 		{
 			return items[id];
 		}
@@ -332,51 +325,53 @@ namespace raidhook::scriptdata
 			return use32bit;
 		}
 
-		explicit write_info(bool use32bit) : use32bit(use32bit) {}
+		explicit write_info(bool use32bit) : use32bit(use32bit)
+		{
+		}
 		write_info(write_info&) = delete;
 
 		write_block& create_block()
 		{
-			if(blocks_applied)
+			if (blocks_applied)
 			{
 				throw "cannot create blocks after they are applied";
 			}
 
-			write_block *block = new write_block();
+			write_block* block = new write_block();
 
 			blocks.push_back(std::unique_ptr<write_block>(block));
 
 			return *blocks.back();
 		}
 
-		void create_linkage(write_block &block, linkage::on_address_set_t cb)
+		void create_linkage(write_block& block, linkage::on_address_set_t cb)
 		{
 			linkage lk = linkage(&block, cb);
 			linkages.push_back(std::move(lk));
 		}
 
-		void apply_blocks(ostream &out)
+		void apply_blocks(ostream& out)
 		{
 			blocks_applied = true;
 
-			for(const std::unique_ptr<write_block> &block : blocks)
+			for (const std::unique_ptr<write_block>& block : blocks)
 			{
 				block->write_to(out);
 			}
 
 			// TODO linkages
-			for(const linkage& ln : linkages)
+			for (const linkage& ln : linkages)
 			{
 				ln.on_address_set(ln.block->offset);
 			}
 		}
 
-		const std::map<int, std::vector<const SItem*>> &Items()
+		const std::map<int, std::vector<const SItem*>>& Items()
 		{
 			return items;
 		}
 
-	private:
+	  private:
 		std::map<int, std::vector<const SItem*>> items;
 		std::map<int, std::map<const SItem*, int>> item_positions;
 		std::vector<std::unique_ptr<write_block>> blocks;
@@ -387,9 +382,9 @@ namespace raidhook::scriptdata
 		bool use32bit = false;
 	};
 
-	static void writeRef(write_block &out, SItem::write_info *info, const SItem *item)
+	static void writeRef(write_block& out, SItem::write_info* info, const SItem* item)
 	{
-		switch(item->GetId())
+		switch (item->GetId())
 		{
 		case SNil::ID:
 		case SBool::ID_F:
@@ -405,9 +400,9 @@ namespace raidhook::scriptdata
 
 	std::string SItem::Serialise(bool use32bit) const
 	{
-		auto serialise_vector = [] (write_block &out, SItem::write_info &data, int id)
+		auto serialise_vector = [](write_block& out, SItem::write_info& data, int id)
 		{
-			const std::vector<const SItem*> &items = data.ListOf(id);
+			const std::vector<const SItem*>& items = data.ListOf(id);
 
 			// contents vector
 			uint32_t count = items.size(); // 0xEFBEADDE;
@@ -418,30 +413,34 @@ namespace raidhook::scriptdata
 
 			// Write the contents pointer, which gets overwritten with the address of the contents block
 			uint32_t pos = out.tellp();
-			write_block &contents = data.create_block();
-			data.create_linkage(contents, [is32, &out, pos](uint32_t offset)
-			{
-				out.seek(pos);
-				writePtr(out, is32, offset);
-			});
+			write_block& contents = data.create_block();
+			data.create_linkage(contents,
+			                    [is32, &out, pos](uint32_t offset)
+			                    {
+									out.seek(pos);
+									writePtr(out, is32, offset);
+								});
 			writePtr(out, is32, 0); // contents
 
-			writePtr(out, is32, 0 /* 0xDEADBEEF */); // allocator (overwritten, value doesn't matter for RAID, tool thinks it's 32-bit if this is zero, so write an easily identifiable value here)
+			writePtr(out, is32,
+			         0 /* 0xDEADBEEF */); // allocator (overwritten, value doesn't matter for RAID, tool thinks it's
+			                              // 32-bit if this is zero, so write an easily identifiable value here)
 
 			// Write out the contents
-			for(const SItem* item : items)
+			for (const SItem* item : items)
 			{
 				item->Serialise(contents, data);
 			}
 		};
 
-		//RAIDHOOK_LOG_LOG("S:0");
+		// RAIDHOOK_LOG_LOG("S:0");
 		auto timer = std::chrono::high_resolution_clock::now();
-		auto printtime = [&timer](std::string name) {
+		auto printtime = [&timer](std::string name)
+		{
 			auto now = std::chrono::high_resolution_clock::now();
 			long time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - timer).count();
 			std::string str = name + " : " + std::to_string(time_ms);
-			//RAIDHOOK_LOG_LOG(str.c_str());
+			// RAIDHOOK_LOG_LOG(str.c_str());
 			timer = now;
 		};
 
@@ -450,11 +449,13 @@ namespace raidhook::scriptdata
 		printtime("S:1");
 
 		// Explore the dependency tree between objects, to make sure we've found everything
-		Register([&data](const SItem *item) {
-			bool added;
-			data.IndexOf(item, &added);
-			return added;
-		});
+		Register(
+			[&data](const SItem* item)
+			{
+				bool added;
+				data.IndexOf(item, &added);
+				return added;
+			});
 
 		printtime("S:2");
 
@@ -462,7 +463,7 @@ namespace raidhook::scriptdata
 		data.freeze();
 
 		// Make sure we create the first block after freezing, otherwise it would be removed and be invalid
-		write_block &out = data.create_block();
+		write_block& out = data.create_block();
 
 		// Allocator pointer
 		// Written over during loading, afaik we can put anything here
@@ -502,12 +503,12 @@ namespace raidhook::scriptdata
 		return outstream.str();
 	}
 
-	void SNum::Serialise(write_block &out, write_info &info) const
+	void SNum::Serialise(write_block& out, write_info& info) const
 	{
 		writeVal<float>(out, val);
 	}
 
-	void SString::Serialise(write_block &out, write_info &info) const
+	void SString::Serialise(write_block& out, write_info& info) const
 	{
 		bool is32 = info.is32bit();
 
@@ -515,13 +516,14 @@ namespace raidhook::scriptdata
 		// as above, we should avoid zero here (though it probably doesn't really matter)
 		writePtr(out, is32, 0 /* 0xDEADBEEF */);
 
-		write_block &blk = info.create_block();
+		write_block& blk = info.create_block();
 		uint32_t pos = out.tellp();
-		info.create_linkage(blk, [is32, &out, pos](uint32_t offset)
-		{
-			out.seek(pos);
-			writePtr(out, is32, offset);
-		});
+		info.create_linkage(blk,
+		                    [is32, &out, pos](uint32_t offset)
+		                    {
+								out.seek(pos);
+								writePtr(out, is32, offset);
+							});
 
 		// Write zero for the string offset for now, we'll overwrite this with the block as per above
 		writePtr(out, info.is32bit(), 0);
@@ -529,14 +531,14 @@ namespace raidhook::scriptdata
 		blk.stream() << val << ((char)0);
 	}
 
-	void SVector::Serialise(write_block &out, write_info &info) const
+	void SVector::Serialise(write_block& out, write_info& info) const
 	{
 		writeVal<float>(out, x);
 		writeVal<float>(out, y);
 		writeVal<float>(out, z);
 	}
 
-	void SQuaternion::Serialise(write_block &out, write_info &info) const
+	void SQuaternion::Serialise(write_block& out, write_info& info) const
 	{
 		writeVal<float>(out, x);
 		writeVal<float>(out, y);
@@ -544,17 +546,17 @@ namespace raidhook::scriptdata
 		writeVal<float>(out, w);
 	}
 
-	void SIdstring::Serialise(write_block &out, write_info &info) const
+	void SIdstring::Serialise(write_block& out, write_info& info) const
 	{
 		writeVal<uint64_t>(out, val);
 	}
 
-	void STable::Serialise(write_block &out, write_info &info) const
+	void STable::Serialise(write_block& out, write_info& info) const
 	{
 		bool is32 = info.is32bit();
 
 		// meta
-		if(meta)
+		if (meta)
 			writePtr(out, is32, info.IndexOf(meta));
 		else
 			writePtr(out, is32, 0xFFFFFFFF);
@@ -565,19 +567,20 @@ namespace raidhook::scriptdata
 		writeVal<uint32_t>(out, count); // capacity
 
 		// Write the contents pointer, which gets overwritten with the address of the contents block
-		write_block &contents = info.create_block();
+		write_block& contents = info.create_block();
 		uint32_t pos = out.tellp();
-		info.create_linkage(contents, [is32, &out, pos](uint32_t offset)
-		{
-			out.seek(pos);
-			writePtr(out, is32, offset);
-		});
+		info.create_linkage(contents,
+		                    [is32, &out, pos](uint32_t offset)
+		                    {
+								out.seek(pos);
+								writePtr(out, is32, offset);
+							});
 		writePtr(out, is32, 0); // contents
 
-		writePtr(out, is32, 0 /*0xDEADBEEF*/ ); // allocator - see earlier uses for a comment of this
+		writePtr(out, is32, 0 /*0xDEADBEEF*/); // allocator - see earlier uses for a comment of this
 
 		// Write out the contents
-		for(std::pair<const SItem*, const SItem*> pair : items)
+		for (std::pair<const SItem*, const SItem*> pair : items)
 		{
 			writeRef(contents, &info, pair.first);
 			writeRef(contents, &info, pair.second);
@@ -586,17 +589,19 @@ namespace raidhook::scriptdata
 
 	void STable::Register(RegReceiver receiver) const
 	{
-		// Try to add ourselves, if we've already been added then bail to avoid infinite recursion if we contain ourselves
+		// Try to add ourselves, if we've already been added then bail to avoid infinite recursion if we contain
+		// ourselves
 		bool added = receiver(this);
-		if(!added) return;
+		if (!added)
+			return;
 
-		if(meta)
+		if (meta)
 			meta->Register(receiver);
 
-		for(std::pair<const SItem*, const SItem*> pair : items)
+		for (std::pair<const SItem*, const SItem*> pair : items)
 		{
 			pair.first->Register(receiver);
 			pair.second->Register(receiver);
 		}
 	}
-};
+}; // namespace raidhook::scriptdata

@@ -67,8 +67,8 @@ static void normalise_hash(WrenVM* vm)
 }
 
 WrenForeignMethodFn raidhook::tweaker::wren_utils::bind_wren_utils_method(WrenVM* vm, const char* module,
-                                                                         const char* className, bool isStatic,
-                                                                         const char* signature)
+                                                                          const char* className, bool isStatic,
+                                                                          const char* signature)
 {
 	if (strcmp(module, "base/native/Utils_001") == 0)
 	{

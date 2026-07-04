@@ -3,29 +3,29 @@
 
 #include "lua.h"
 
-#include "platform.h"
 #include "lua_functions.h"
+#include "platform.h"
 
-#include "util/util.h"
-#include "threading/queue.h"
+#include "dbutil/DB.h"
 #include "http/http.h"
-#include "tweaker/xmltweaker.h"
-#include "tweaker/wren_lua_interface.h"
-#include "plugins/plugins.h"
-#include "scriptdata/ScriptData.h"
-#include "luautil/luautil.h"
 #include "luautil/LuaAssetDb.h"
 #include "luautil/LuaAsyncIO.h"
-#include "dbutil/DB.h"
+#include "luautil/luautil.h"
+#include "plugins/plugins.h"
+#include "scriptdata/ScriptData.h"
+#include "threading/queue.h"
+#include "tweaker/wren_lua_interface.h"
+#include "tweaker/xmltweaker.h"
+#include "util/util.h"
 
 #ifdef ENABLE_XAUDIO
 #include "xaudio/XAudio.h"
 #endif
 
 #include <format>
-#include <thread>
-#include <list>
 #include <fstream>
+#include <list>
+#include <thread>
 
 namespace raidhook
 {
@@ -54,8 +54,8 @@ namespace raidhook
 		return false;
 	}
 
-	// Not tracking the error count here so it can automatically be reset to 0 whenever the Lua state is deleted and re-created (e.g.
-	// when transitioning to / from the menu to a level)
+	// Not tracking the error count here so it can automatically be reset to 0 whenever the Lua state is deleted and
+	// re-created (e.g. when transitioning to / from the menu to a level)
 	static void NotifyErrorOverlay(lua_State* L, const char* message)
 	{
 		lua_getglobal(L, "NotifyErrorOverlay");
@@ -70,8 +70,8 @@ namespace raidhook
 			int error = lua_pcall(L, args, 0, 0);
 			if (error == LUA_ERRRUN)
 			{
-				// Don't bother logging the error since the error overlay is designed to be an optional component, just pop the error
-				// message off the stack to keep it balanced
+				// Don't bother logging the error since the error overlay is designed to be an optional component, just
+				// pop the error message off the stack to keep it balanced
 				lua_pop(L, 1);
 				return;
 			}
@@ -82,7 +82,8 @@ namespace raidhook
 			static bool printed = false;
 			if (!printed)
 			{
-				printf("Warning: Failed to find the NotifyErrorOverlay function in the Lua environment; no in-game notifications will be displayed for caught errors\n");
+				printf("Warning: Failed to find the NotifyErrorOverlay function in the Lua environment; no in-game "
+				       "notifications will be displayed for caught errors\n");
 				printed = true;
 			}
 		}
@@ -107,7 +108,7 @@ namespace raidhook
 
 	static int luaF_forcepcalls(lua_State* L)
 	{
-		int args = lua_gettop(L);	// Number of arguments
+		int args = lua_gettop(L); // Number of arguments
 		if (args < 1)
 		{
 			RAIDHOOK_LOG_WARN("blt.forcepcalls(): Called with no arguments, ignoring request");
@@ -143,7 +144,8 @@ namespace raidhook
 		int index = 1;
 		for (it = directories.begin(); it < directories.end(); it++)
 		{
-			if (*it == "." || *it == "..") continue;
+			if (*it == "." || *it == "..")
+				continue;
 			lua_pushinteger(L, index);
 			lua_pushlstring(L, it->c_str(), it->length());
 			lua_settable(L, -3);
@@ -213,9 +215,10 @@ namespace raidhook
 		lua_insert(L, errorhandler);
 
 		int result = lua_pcall(L, args, LUA_MULTRET, errorhandler);
-		// lua_pcall() automatically pops the callee function and its arguments off the stack. Then, if no errors were encountered
-		// during execution, it pushes the return values onto the stack, if any. Otherwise, if an error was encountered, it pushes
-		// the error message onto the stack, which should manually be popped off when done using to keep the stack balanced
+		// lua_pcall() automatically pops the callee function and its arguments off the stack. Then, if no errors were
+		// encountered during execution, it pushes the return values onto the stack, if any. Otherwise, if an error was
+		// encountered, it pushes the error message onto the stack, which should manually be popped off when done using
+		// to keep the stack balanced
 		if (result == LUA_ERRRUN)
 		{
 			size_t len;
@@ -224,13 +227,13 @@ namespace raidhook
 			lua_pop(L, 1);
 			return 0;
 		}
-		// Do not use lua_pop() as the callee function's return values may be present, which would pop one of those instead and leave
-		// the error handler on the stack
+		// Do not use lua_pop() as the callee function's return values may be present, which would pop one of those
+		// instead and leave the error handler on the stack
 		lua_remove(L, errorhandler);
 		lua_pushboolean(L, result == 0);
 		lua_insert(L, 1);
 
-		//if (result != 0) return 1;
+		// if (result != 0) return 1;
 
 		return lua_gettop(L);
 	}
@@ -259,7 +262,7 @@ namespace raidhook
 		lua_pushboolean(L, (status == 0));
 		lua_replace(L, 1);
 
-		return lua_gettop(L);  // return entire stack - status, possible err + all results
+		return lua_gettop(L); // return entire stack - status, possible err + all results
 	}
 
 	static int luaF_dofile(lua_State* L)
@@ -295,8 +298,8 @@ namespace raidhook
 				// This call pops the error message off the stack
 				lua_pop(L, 1);
 			}
-			// Do not use lua_pop() as the callee function's return values may be present, which would pop one of those instead and
-			// leave the error handler on the stack
+			// Do not use lua_pop() as the callee function's return values may be present, which would pop one of those
+			// instead and leave the error handler on the stack
 			lua_remove(L, errorhandler);
 		}
 		return 0;
@@ -336,7 +339,7 @@ namespace raidhook
 		lua_settable(ourData->L, -3);
 		lua_pushstring(ourData->L, "headers");
 		lua_newtable(ourData->L);
-		for(std::pair<std::string, std::string> element:httpItem->responseHeaders)
+		for (std::pair<std::string, std::string> element : httpItem->responseHeaders)
 		{
 			lua_pushstring(ourData->L, element.first.c_str());
 			lua_pushstring(ourData->L, element.second.c_str());
@@ -358,7 +361,8 @@ namespace raidhook
 			return;
 		}
 
-		if (ourData->progressRef == 0) return;
+		if (ourData->progressRef == 0)
+			return;
 		lua_rawgeti(ourData->L, LUA_REGISTRYINDEX, ourData->progressRef);
 		lua_pushinteger(ourData->L, ourData->requestIdentifier);
 		lua_pushinteger(ourData->L, progress);
@@ -389,8 +393,8 @@ namespace raidhook
 		Util::FileType type = Util::GetFileType(filename);
 		if (Util::GetFileType(filename) != Util::FileType_Directory)
 		{
-			luaL_error(L, "Invalid directory %s: type=%d (none=%d,file=%d,dir=%d)", filename, type,
-			           Util::FileType_None, Util::FileType_File, Util::FileType_Directory);
+			luaL_error(L, "Invalid directory %s: type=%d (none=%d,file=%d,dir=%d)", filename, type, Util::FileType_None,
+			           Util::FileType_File, Util::FileType_Directory);
 		}
 
 		if (!lua_isnoneornil(L, 2))
@@ -411,13 +415,13 @@ namespace raidhook
 	static int luaF_filehash(lua_State* L)
 	{
 		size_t l = 0;
-		const char * filename = lua_tolstring(L, 1, &l);
+		const char* filename = lua_tolstring(L, 1, &l);
 
 		Util::FileType type = Util::GetFileType(filename);
 		if (Util::GetFileType(filename) != Util::FileType_File)
 		{
-			luaL_error(L, "Invalid file %s: type=%d (file=%d,dir=%d,none=%d)", filename, type,
-			           Util::FileType_File, Util::FileType_Directory, Util::FileType_None);
+			luaL_error(L, "Invalid file %s: type=%d (file=%d,dir=%d,none=%d)", filename, type, Util::FileType_File,
+			           Util::FileType_Directory, Util::FileType_None);
 		}
 
 		if (!lua_isnoneornil(L, 2))
@@ -477,17 +481,17 @@ namespace raidhook
 
 	/*static int luaF_createconsole(lua_State* L) // TODO reenable
 	{
-		if (gbl_mConsole) return 0;
-		gbl_mConsole = new CConsole();
-		return 0;
+	    if (gbl_mConsole) return 0;
+	    gbl_mConsole = new CConsole();
+	    return 0;
 	}
 
 	static int luaF_destroyconsole(lua_State* L)
 	{
-		if (!gbl_mConsole) return 0;
-		delete gbl_mConsole;
-		gbl_mConsole = NULL;
-		return 0;
+	    if (!gbl_mConsole) return 0;
+	    delete gbl_mConsole;
+	    gbl_mConsole = NULL;
+	    return 0;
 	}*/
 
 	static int luaF_print(lua_State* L)
@@ -516,9 +520,9 @@ namespace raidhook
 	static int luaF_moveDirectory(lua_State* L)
 	{
 		size_t lf = 0;
-		const char * fromStr = lua_tolstring(L, 1, &lf);
+		const char* fromStr = lua_tolstring(L, 1, &lf);
 		size_t ld = 0;
-		const char * destStr = lua_tolstring(L, 2, &ld);
+		const char* destStr = lua_tolstring(L, 2, &ld);
 
 		bool success = Util::MoveDirectory(fromStr, destStr);
 		lua_pushboolean(L, success);
@@ -527,7 +531,7 @@ namespace raidhook
 
 	static int luaF_createDirectory(lua_State* L)
 	{
-		const char *path = lua_tostring(L, 1);
+		const char* path = lua_tostring(L, 1);
 		bool success = Util::CreateDirectorySingle(path);
 		lua_pushboolean(L, success);
 		return 1;
@@ -546,8 +550,8 @@ namespace raidhook
 		lua_newtable(L);
 		for (int i = 0; i < mxmlElementGetAttrCount(node); i++)
 		{
-			const char *name;
-			const char *value = mxmlElementGetAttrByIndex(node, i, &name);
+			const char* name;
+			const char* value = mxmlElementGetAttrByIndex(node, i, &name);
 
 			lua_pushstring(L, value);
 			lua_setfield(L, -2, name);
@@ -556,7 +560,7 @@ namespace raidhook
 		lua_setfield(L, -2, "params");
 
 		// Add all the child nodes
-		mxml_node_t *child = mxmlGetFirstChild(node);
+		mxml_node_t* child = mxmlGetFirstChild(node);
 		int i = 1;
 		while (child != NULL)
 		{
@@ -578,11 +582,11 @@ namespace raidhook
 
 	static int luaF_parsexml(lua_State* L)
 	{
-		const char *xml = lua_tostring(L, 1);
+		const char* xml = lua_tostring(L, 1);
 
 		mxmlSetErrorCallback(handle_mxml_error);
 
-		mxml_node_t *tree = mxmlLoadString(NULL, xml, MXML_IGNORE_CALLBACK);
+		mxml_node_t* tree = mxmlLoadString(NULL, xml, MXML_IGNORE_CALLBACK);
 
 		if (mxml_last_error)
 		{
@@ -597,7 +601,7 @@ namespace raidhook
 			return 1;
 		}
 
-		mxml_node_t *base = tree;
+		mxml_node_t* base = tree;
 		if (base && !strncmp(mxmlGetElement(base), "?xml", 4))
 		{
 			base = mxmlGetFirstChild(base);
@@ -628,17 +632,17 @@ namespace raidhook
 			luaL_error(L, "Signature: structid(struct)");
 		}
 
-		void *value_ptr = NULL;
+		void* value_ptr = NULL;
 
 		typedef struct
 		{
-			uint32_t gcptr32;     /* Pseudo 32 bit pointer. */
-			uint32_t it;      /* Internal object tag. Must overlap MSW of number. */
+			uint32_t gcptr32; /* Pseudo 32 bit pointer. */
+			uint32_t it; /* Internal object tag. Must overlap MSW of number. */
 		} TValue;
 
-		const TValue **value;
+		const TValue** value;
 		{
-			char *ptr = (char*)L;
+			char* ptr = (char*)L;
 			ptr += 16; // Lua stack starts here, ends at +20
 			value = (const TValue**)ptr;
 		}
@@ -649,7 +653,7 @@ namespace raidhook
 		}
 		else if ((*value)->it > (~13u)) // Boiled down from lua_topointer in LuaJIT
 		{
-			value_ptr = (void*) (uint64_t) (*value)->gcptr32;
+			value_ptr = (void*)(uint64_t)(*value)->gcptr32;
 		}
 		else
 		{
@@ -682,7 +686,7 @@ namespace raidhook
 
 		try
 		{
-			blt::plugins::Plugin *plugin = NULL;
+			blt::plugins::Plugin* plugin = NULL;
 			blt::plugins::PluginLoadResult result = blt::plugins::LoadPlugin(file, &plugin);
 
 			// TODO some kind of UUID system to prevent issues with multiple mods having the same DLL
@@ -700,7 +704,6 @@ namespace raidhook
 
 			lua_insert(L, -1 - count);
 			return count + 1;
-
 		}
 		catch (std::string err)
 		{
@@ -733,7 +736,8 @@ namespace raidhook
 
 		if (verSize == 0)
 		{
-			RAIDHOOK_LOG_ERROR(std::format("Error occurred while calling 'GetFileVersionInfoSize': {}", GetLastError()));
+			RAIDHOOK_LOG_ERROR(
+				std::format("Error occurred while calling 'GetFileVersionInfoSize': {}", GetLastError()));
 			lua_pushstring(L, "0.0.0.0");
 			return 1;
 		}
@@ -788,7 +792,7 @@ namespace raidhook
 	static int luaF_sd_identify(lua_State* L)
 	{
 		size_t len;
-		const char *data = lua_tolstring(L, 1, &len);
+		const char* data = lua_tolstring(L, 1, &len);
 
 		bool is32bit = raidhook::scriptdata::determine_is_32bit(len, (const uint8_t*)data);
 
@@ -803,9 +807,9 @@ namespace raidhook
 	static int luaF_sd_recode(lua_State* L)
 	{
 		size_t len;
-		const char *data = lua_tolstring(L, 1, &len);
+		const char* data = lua_tolstring(L, 1, &len);
 
-		if(lua_type(L, 2) != LUA_TTABLE)
+		if (lua_type(L, 2) != LUA_TTABLE)
 		{
 			luaL_error(L, "Second argument to blt.scriptdata.recode must be a table");
 		}
@@ -823,12 +827,7 @@ namespace raidhook
 
 	static void load_scriptdata_library(lua_State* L)
 	{
-		luaL_Reg items[] =
-		{
-			{ "identify", luaF_sd_identify },
-			{ "recode", luaF_sd_recode },
-			{ NULL, NULL }
-		};
+		luaL_Reg items[] = {{"identify", luaF_sd_identify}, {"recode", luaF_sd_recode}, {NULL, NULL}};
 		lua_newtable(L); // create the scriptdata table
 		luaL_register(L, nullptr, items); // name is null, so register everything onto the table on top of the stack
 		lua_setfield(L, -2, "scriptdata"); // save it into the blt table
@@ -852,7 +851,7 @@ namespace raidhook
 		blt::platform::ClosePlatform();
 	}
 
-}
+} // namespace raidhook
 
 using namespace raidhook;
 
@@ -865,7 +864,7 @@ namespace blt
 		{
 			// https://stackoverflow.com/questions/30021904/lua-set-default-error-handler/30022216#30022216
 			lua_getglobal(L, "debug");
-			if(lua_isnil(L, -1))
+			if (lua_isnil(L, -1))
 			{
 				// Debug isn't available, use normal call
 				lua_remove(L, -1);
@@ -873,8 +872,8 @@ namespace blt
 			}
 			lua_getfield(L, -1, "traceback");
 			lua_remove(L, -2);
-			// Do not index from the top (i.e. use a negative index) as this has the potential to mess up if the callee function returns
-			// values /and/ lua_pcall() is set up with a > 0 nresults argument
+			// Do not index from the top (i.e. use a negative index) as this has the potential to mess up if the callee
+			// function returns values /and/ lua_pcall() is set up with a > 0 nresults argument
 			int errorhandler = lua_gettop(L) - args - 1;
 			lua_insert(L, errorhandler);
 
@@ -890,8 +889,8 @@ namespace blt
 				// No, don't touch this variable anymore
 				message = nullptr;
 			}
-			// This call removes the error handler from the stack. Do not use lua_pop() as the callee function's return values may be
-			// present, which would pop one of those instead and leave the error handler on the stack
+			// This call removes the error handler from the stack. Do not use lua_pop() as the callee function's return
+			// values may be present, which would pop one of those instead and leave the error handler on the stack
 			lua_remove(L, errorhandler);
 		}
 
@@ -900,17 +899,17 @@ namespace blt
 		// Random dude who wrote what's his face?
 		// I 'unno, I stole this method from the guy who wrote the 'underground-light-lua-hook'
 		// Mine worked fine, but this seems more elegant.
-		void initiate_lua(lua_State *L)
+		void initiate_lua(lua_State* L)
 		{
 			add_active_state(L);
 
 			std::ifstream infileunsafedev("mods/unsafe_developer.txt"); // TODO find better name?
 			if (infileunsafedev.good())
 			{
-				RAIDHOOK_LOG_LOG("Forcing pcalls early!\nPlease backup your save file as this feature is intended for developers only and might break alot of things down the line!");
+				RAIDHOOK_LOG_LOG("Forcing pcalls early!\nPlease backup your save file as this feature is intended for "
+				                 "developers only and might break alot of things down the line!");
 				luaF_forcepcalls(L);
 			}
-
 
 			if (!setup_check_done)
 			{
@@ -920,18 +919,22 @@ namespace blt
 				{
 					/*int result = MessageBox(NULL,
 					                             "Do you want to download the RAID SuperBLT basemod?\n"
-					                        "This is required for using mods", "SuperBLT 'mods/base' folder missing", MB_YESNO);
-					if (result == IDYES) download_blt();*/
-					MessageBox(NULL, "SuperBLT basemod is required to use mods, it will be downloaded now", "SuperBLT basemod required", MB_OK);
+					                        "This is required for using mods", "SuperBLT 'mods/base' folder missing",
+					MB_YESNO); if (result == IDYES) download_blt();*/
+					MessageBox(NULL, "SuperBLT basemod is required to use mods, it will be downloaded now",
+					           "SuperBLT basemod required", MB_OK);
 					download_blt();
 					return;
 				}
 
 				if (!Util::DirectoryExists("mods/base/wren"))
 				{
-					int result = MessageBox(NULL, "It appears you have a vanilla BLT basemod. This is incompatible with SuperBLT.\n"
-					                         "Please delete your 'mods/base' folder, and run the game again to automatically download a compatible version",
-					                         "BLT basemod outdated", MB_OK);
+					int result =
+						MessageBox(NULL,
+					               "It appears you have a vanilla BLT basemod. This is incompatible with SuperBLT.\n"
+					               "Please delete your 'mods/base' folder, and run the game again to automatically "
+					               "download a compatible version",
+					               "BLT basemod outdated", MB_OK);
 
 					exit(1);
 					return;
@@ -953,50 +956,44 @@ namespace blt
 			lua_pushcclosure(L, luaF_dohttpreq, 0);
 			lua_setfield(L, LUA_GLOBALSINDEX, "dohttpreq");
 
-			luaL_Reg consoleLib[] =
-			{
-				/*{ "CreateConsole", luaF_createconsole }, // TODO reenable
-				{ "DestroyConsole", luaF_destroyconsole },*/
-				{ NULL, NULL }
-			};
+			luaL_Reg consoleLib[] = {/*{ "CreateConsole", luaF_createconsole }, // TODO reenable
+			                         { "DestroyConsole", luaF_destroyconsole },*/
+			                         {NULL, NULL}};
 			luaL_register(L, "console", consoleLib);
 			lua_pop(L, 1);
 
-			luaL_Reg fileLib[] =
-			{
-				{ "GetDirectories", luaF_getdir },
-				{ "GetFiles", luaF_getfiles },
-				{ "RemoveDirectory", luaF_removeDirectory },
-				{ "DirectoryExists", luaF_directoryExists },
-				{ "DirectoryHash", luaF_directoryhash },
-				{ "FileExists", luaF_fileExists },
-				{ "FileHash", luaF_filehash },
-				{ "MoveDirectory", luaF_moveDirectory },
-				{ "CreateDirectory", luaF_createDirectory },
-				{ NULL, NULL }
-			};
+			luaL_Reg fileLib[] = {{"GetDirectories", luaF_getdir},
+			                      {"GetFiles", luaF_getfiles},
+			                      {"RemoveDirectory", luaF_removeDirectory},
+			                      {"DirectoryExists", luaF_directoryExists},
+			                      {"DirectoryHash", luaF_directoryhash},
+			                      {"FileExists", luaF_fileExists},
+			                      {"FileHash", luaF_filehash},
+			                      {"MoveDirectory", luaF_moveDirectory},
+			                      {"CreateDirectory", luaF_createDirectory},
+			                      {NULL, NULL}};
 			luaL_register(L, "file", fileLib);
 			lua_pop(L, 1);
 
-			// Keeping everything in lowercase since IspcallForced / IsPCallForced and Forcepcalls / ForcePCalls look rather weird anyway
-			luaL_Reg bltLib[] =
-			{
-				{ "ispcallforced", luaF_ispcallforced },
-				{ "forcepcalls", luaF_forcepcalls },
-				{ "parsexml", luaF_parsexml },
-				{ "structid", luaF_structid },
-				{ "ignoretweak", luaF_ignoretweak },
-				{ "load_native", luaF_load_native },
-				{ "blt_info", luaF_blt_info },
-				{ "blt_version", luaF_blt_version },
-				{ "flush_log", luaF_flush_log },
+			// Keeping everything in lowercase since IspcallForced / IsPCallForced and Forcepcalls / ForcePCalls look
+			// rather weird anyway
+			luaL_Reg bltLib[] = {
+				{"ispcallforced", luaF_ispcallforced},
+				{"forcepcalls", luaF_forcepcalls},
+				{"parsexml", luaF_parsexml},
+				{"structid", luaF_structid},
+				{"ignoretweak", luaF_ignoretweak},
+				{"load_native", luaF_load_native},
+				{"blt_info", luaF_blt_info},
+				{"blt_version", luaF_blt_version},
+				{"flush_log", luaF_flush_log},
 
 				// Functions that are supposed to be in Lua, but are either omitted or implemented improperly (pcall)
-				{ "pcall", luaF_pcall_proper }, // Lua pcall shouldn't print errors, however BLT's global pcall does (leave it for compat)
-				{ "xpcall", luaF_xpcall },
+				{"pcall", luaF_pcall_proper}, // Lua pcall shouldn't print errors, however BLT's global pcall does
+			                                  // (leave it for compat)
+				{"xpcall", luaF_xpcall},
 
-				{ NULL, NULL }
-			};
+				{NULL, NULL}};
 			luaL_register(L, "blt", bltLib);
 
 			load_scriptdata_library(L);
@@ -1011,7 +1008,7 @@ namespace blt
 			xaudio::XAudio::Register(L);
 #endif
 
-			for (plugins::Plugin *plugin : plugins::GetPlugins())
+			for (plugins::Plugin* plugin : plugins::GetPlugins())
 			{
 				plugin->AddToState(L);
 			}
@@ -1039,7 +1036,7 @@ namespace blt
 			return;
 		}
 
-		void close(lua_State *L)
+		void close(lua_State* L)
 		{
 			remove_active_state(L);
 		}
@@ -1058,7 +1055,7 @@ namespace blt
 
 			for (lua_State*& state : activeStates)
 			{
-				for (plugins::Plugin *plugin : plugins::GetPlugins())
+				for (plugins::Plugin* plugin : plugins::GetPlugins())
 				{
 					plugin->Update(state);
 				}
@@ -1066,13 +1063,13 @@ namespace blt
 
 			updates++;
 		}
-	};
+	}; // namespace lua_functions
 
-	void plugins::RegisterPluginForActiveStates(Plugin * plugin)
+	void plugins::RegisterPluginForActiveStates(Plugin* plugin)
 	{
-		for (lua_State *&state : activeStates)
+		for (lua_State*& state : activeStates)
 		{
 			plugin->AddToState(state);
 		}
 	}
-};
+}; // namespace blt

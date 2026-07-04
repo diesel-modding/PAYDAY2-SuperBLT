@@ -11,14 +11,11 @@ namespace raidhook
 
 	void EventQueueMaster::ProcessEvents()
 	{
-		std::for_each(queues.begin(), queues.end(), [](IEventQueue *q)
-		{
-			q->ProcessEvents();
-		});
+		std::for_each(queues.begin(), queues.end(), [](IEventQueue* q) { q->ProcessEvents(); });
 	}
 
-	void EventQueueMaster::registerQueue(IEventQueue *q)
+	void EventQueueMaster::registerQueue(IEventQueue* q)
 	{
 		queues.push_back(q);
 	}
-}
+} // namespace raidhook

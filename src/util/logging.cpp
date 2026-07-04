@@ -78,7 +78,7 @@ namespace raidhook
 
 			class LoggerImpl : public Logger
 			{
-			public:
+			  public:
 				LoggerImpl(std::string&& file);
 
 				void setForceFlush(bool forceFlush);
@@ -94,7 +94,7 @@ namespace raidhook
 
 				void log(const Message_t& msg);
 
-			private:
+			  private:
 				bool mIsOpen = false;
 
 				LineTerminator_t mEndl = quick_endl;
@@ -159,7 +159,7 @@ namespace raidhook
 
 				mOut << msg << mEndl;
 			}
-		}
+		} // namespace
 
 		Logger& Logger::Instance()
 		{
@@ -174,17 +174,17 @@ namespace raidhook
 
 		void Logger::setForceFlush(bool forceFlush)
 		{
-			static_cast<LoggerImpl *>(this)->setForceFlush(forceFlush);
+			static_cast<LoggerImpl*>(this)->setForceFlush(forceFlush);
 		}
 
 		void Logger::flush()
 		{
-			static_cast<LoggerImpl *>(this)->flush();
+			static_cast<LoggerImpl*>(this)->flush();
 		}
 
 		void Logger::log(const Message_t& msg)
 		{
-			static_cast<LoggerImpl *>(this)->log(msg);
+			static_cast<LoggerImpl*>(this)->log(msg);
 		}
 
 		LogWriter::LogWriter(LogType msgType)
@@ -192,7 +192,7 @@ namespace raidhook
 			*this << LogTime << msgType << ' ';
 		}
 
-		LogWriter::LogWriter(const char *file, int line, LogType msgType)
+		LogWriter::LogWriter(const char* file, int line, LogType msgType)
 		{
 			if (line && line > 0)
 			{
@@ -214,5 +214,5 @@ namespace raidhook
 				needsFlush = true;
 			}
 		}
-	}
-}
+	} // namespace Logging
+} // namespace raidhook

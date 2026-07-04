@@ -13,44 +13,44 @@ namespace raidhook
 {
 	class IEventQueue
 	{
-	public:
-		virtual ~IEventQueue() {}
+	  public:
+		virtual ~IEventQueue()
+		{
+		}
 		virtual void ProcessEvents() = 0;
 	};
 
 	class EventQueueMaster
 	{
-		template<typename T>
-		friend class EventQueue;
+		template <typename T> friend class EventQueue;
 
-	private:
+	  private:
 		EventQueueMaster() = default;
 
-	public:
+	  public:
 		static EventQueueMaster& GetSingleton();
 
 		void ProcessEvents();
 
-	private:
-		void registerQueue(IEventQueue *queue);
+	  private:
+		void registerQueue(IEventQueue* queue);
 
-		std::list<IEventQueue *> queues;
+		std::list<IEventQueue*> queues;
 	};
 
-	template<typename DataT>
-	class EventQueue : public IEventQueue
+	template <typename DataT> class EventQueue : public IEventQueue
 	{
-	public:
-		typedef void(*EventFunction)(DataT);
+	  public:
+		typedef void (*EventFunction)(DataT);
 
 		class EventItem
 		{
-		public:
+		  public:
 			EventItem(EventFunction runFunction, DataT data);
 			EventItem(EventItem&&); // VC++ 2013 doesn't let you default this. On VC++ 2015 don't even bother declaring.
 			void operator()();
 
-		private:
+		  private:
 			EventItem(const EventItem&) = delete;
 
 			EventFunction mFunc;
@@ -59,21 +59,20 @@ namespace raidhook
 
 		static EventQueue& GetSingleton();
 
-	protected:
+	  protected:
 		EventQueue();
 
-	public:
+	  public:
 		virtual void ProcessEvents() override;
 		void AddToQueue(EventItem item);
 		void AddToQueue(EventFunction runFunction, DataT data);
 
-	private:
+	  private:
 		std::deque<EventItem> eventQueue;
 		std::mutex lock;
 	};
 
-	template<typename DataT>
-	struct EventQueueRuntimeRegisterer
+	template <typename DataT> struct EventQueueRuntimeRegisterer
 	{
 		EventQueueRuntimeRegisterer()
 		{
@@ -81,59 +80,58 @@ namespace raidhook
 		}
 	};
 
-#define RAIDHOOK_CONCAT_IMPL(x, y) x ## y
+#define RAIDHOOK_CONCAT_IMPL(x, y) x##y
 #define RAIDHOOK_CONCAT(x, y) RAIDHOOK_CONCAT_IMPL(x, y)
 
-	// Not strictly necessary, but is a nice chance to make sure the static instance is initialised before there's a chance for multithreaded calls
-#define RAIDHOOK_REGISTER_EVENTQUEUE(DataT, Name) \
-	namespace                                                                                         \
-	{                                                                                                 \
+	// Not strictly necessary, but is a nice chance to make sure the static instance is initialised before there's a
+	// chance for multithreaded calls
+#define RAIDHOOK_REGISTER_EVENTQUEUE(DataT, Name)                                                      \
+	namespace                                                                                          \
+	{                                                                                                  \
 		::raidhook::EventQueueRuntimeRegisterer<DataT> RAIDHOOK_CONCAT(staticRegisterer, __COUNTER__); \
 		::raidhook::EventQueue<DataT>& Get##Name##Queue()                                              \
-		{                                                                                             \
+		{                                                                                              \
 			return ::raidhook::EventQueue<DataT>::GetSingleton();                                      \
-		}                                                                                             \
+		}                                                                                              \
 	}
 #define RAIDHOOK_REGISTER_EVENTQUEUE_EASY(DataT) RAIDHOOK_REGISTER_EVENTQUEUE(DataT, DataT)
 
-	#pragma region Implementation
+#pragma region Implementation
 
-	template<typename DataT>
-	EventQueue<DataT>::EventQueue()
+	template <typename DataT> EventQueue<DataT>::EventQueue()
 	{
 		EventQueueMaster::GetSingleton().registerQueue(this);
 	}
 
-	template<typename DataT>
-	EventQueue<DataT>::EventItem::EventItem(EventFunction runFunction, DataT data) :
-		mFunc(runFunction), mData(std::move(data))
-	{}
+	template <typename DataT>
+	EventQueue<DataT>::EventItem::EventItem(EventFunction runFunction, DataT data)
+		: mFunc(runFunction), mData(std::move(data))
+	{
+	}
 
-	template<typename DataT>
-	EventQueue<DataT>::EventItem::EventItem(EventItem&& mv) :
-		mFunc(mv.mFunc), mData(std::move(mv.mData))
-	{}
+	template <typename DataT>
+	EventQueue<DataT>::EventItem::EventItem(EventItem&& mv) : mFunc(mv.mFunc), mData(std::move(mv.mData))
+	{
+	}
 
-	template<typename DataT>
-	void EventQueue<DataT>::EventItem::operator()()
+	template <typename DataT> void EventQueue<DataT>::EventItem::operator()()
 	{
 		mFunc(std::move(mData));
 	}
 
-	template<typename DataT>
-	EventQueue<DataT>& EventQueue<DataT>::GetSingleton()
+	template <typename DataT> EventQueue<DataT>& EventQueue<DataT>::GetSingleton()
 	{
 		static EventQueue<DataT> instance;
 		return instance;
 	}
 
-	template<typename DataT>
-	void EventQueue<DataT>::ProcessEvents()
+	template <typename DataT> void EventQueue<DataT>::ProcessEvents()
 	{
 		decltype(eventQueue) localQueue;
 		{
 			std::lock_guard<std::mutex> locker(lock);
-			// localQueue = std::move(eventQueue); standard is a little iffy on what happens to eventQueue after this, so do it manually
+			// localQueue = std::move(eventQueue); standard is a little iffy on what happens to eventQueue after this,
+			// so do it manually
 			while (!eventQueue.empty())
 			{
 				localQueue.push_back(std::move(eventQueue.front()));
@@ -141,28 +139,23 @@ namespace raidhook
 			}
 		}
 
-		std::for_each(localQueue.begin(), localQueue.end(), [](EventItem& e)
-		{
-			e();
-		});
+		std::for_each(localQueue.begin(), localQueue.end(), [](EventItem& e) { e(); });
 	}
 
-	template<typename DataT>
-	void EventQueue<DataT>::AddToQueue(EventItem item)
+	template <typename DataT> void EventQueue<DataT>::AddToQueue(EventItem item)
 	{
 		std::lock_guard<std::mutex> locker(lock);
 		eventQueue.push_back(std::move(item));
 	}
 
-	template<typename DataT>
-	void EventQueue<DataT>::AddToQueue(EventFunction runFunction, DataT data)
+	template <typename DataT> void EventQueue<DataT>::AddToQueue(EventFunction runFunction, DataT data)
 	{
 		std::lock_guard<std::mutex> locker(lock);
 		eventQueue.emplace_back(runFunction, std::move(data));
 	}
 
-	#pragma endregion
+#pragma endregion
 
-}
+} // namespace raidhook
 
 #endif // __QUEUE_HEADER__

@@ -11,7 +11,7 @@ static subhook::Hook applicationUpdateDetour, newStateDetour, luaCloseDetour, no
 
 static void init_idstring_pointers()
 {
-	char *tmp;
+	char* tmp;
 
 	tmp = (char*)try_open_property_match_resolver;
 	tmp += 0x3A;
@@ -81,7 +81,8 @@ static void setup_platform_game()
 {
 	main_thread_id = std::this_thread::get_id();
 
-	applicationUpdateDetour.Install(application_update, application_update_new, subhook::HookFlags::HookFlag64BitOffset);
+	applicationUpdateDetour.Install(application_update, application_update_new,
+	                                subhook::HookFlags::HookFlag64BitOffset);
 	newStateDetour.Install(LuaInterface__newstate, LuaInterface__newstate_new, subhook::HookFlags::HookFlag64BitOffset);
 	luaCloseDetour.Install(lua_close_exe, lua_close_new, subhook::HookFlags::HookFlag64BitOffset);
 	node_from_xmlDetour.Install(node_from_xml, node_from_xml_new, subhook::HookFlags::HookFlag64BitOffset);

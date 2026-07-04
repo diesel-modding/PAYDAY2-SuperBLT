@@ -1,17 +1,17 @@
 #include "http.h"
+#include "platform.h"
 #include "util/util.h"
 #include <curl/curl.h>
-#include "platform.h"
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 
-static const char *DOWNLOAD_URL = "https://api.modworkshop.net/mods/49758/download";
-static const char *OUT_FILE_NAME = "blt_basemod_download.zip";
+static const char* DOWNLOAD_URL = "https://api.modworkshop.net/mods/49758/download";
+static const char* OUT_FILE_NAME = "blt_basemod_download.zip";
 
-static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_data(void* ptr, size_t size, size_t nmemb, void* stream)
 {
-	size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
+	size_t written = fwrite(ptr, size, nmemb, (FILE*)stream);
 	return written;
 }
 
@@ -27,7 +27,7 @@ void raidhook::download_blt()
 	curl_global_init(CURL_GLOBAL_ALL);
 
 	/* init the curl session */
-	CURL *curl = curl_easy_init();
+	CURL* curl = curl_easy_init();
 
 	curl_easy_setopt(curl, CURLOPT_URL, DOWNLOAD_URL); // Set the URL to download
 	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // Enable the progress meter
@@ -38,7 +38,7 @@ void raidhook::download_blt()
 	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 
 	// Open our ZIP file
-	FILE *pagefile = NULL;
+	FILE* pagefile = NULL;
 	errno_t err = fopen_s(&pagefile, OUT_FILE_NAME, "wb");
 	if (err != 0)
 	{

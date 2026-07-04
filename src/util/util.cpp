@@ -1,11 +1,11 @@
 #include "util.h"
 #include <algorithm>
+#include <format>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <format>
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
@@ -67,21 +67,26 @@ namespace raidhook
 			std::vector<uint8_t> hashObject;
 
 			status = BCryptOpenAlgorithmProvider(&hAlgorithm, BCRYPT_SHA256_ALGORITHM, nullptr, 0);
-			if (status != 0) throw std::runtime_error("Failed to open SHA-256 algorithm provider");
+			if (status != 0)
+				throw std::runtime_error("Failed to open SHA-256 algorithm provider");
 			try
 			{
 				status = BCryptGetProperty(hAlgorithm, BCRYPT_OBJECT_LENGTH, (PUCHAR)&hashObjectLength, sizeof(DWORD),
 				                           &resultLength, 0);
-				if (status != 0) throw std::runtime_error("Failed to get hash object length");
+				if (status != 0)
+					throw std::runtime_error("Failed to get hash object length");
 				hashObject.resize(hashObjectLength);
 				status = BCryptCreateHash(hAlgorithm, &hHash, hashObject.data(), hashObjectLength, nullptr, 0, 0);
-				if (status != 0) throw std::runtime_error("Failed to create hash");
+				if (status != 0)
+					throw std::runtime_error("Failed to create hash");
 				try
 				{
 					status = BCryptHashData(hHash, (PUCHAR)input.data(), input.size(), 0);
-					if (status != 0) throw std::runtime_error("Failed to hash data");
+					if (status != 0)
+						throw std::runtime_error("Failed to hash data");
 					status = BCryptFinishHash(hHash, hash.data(), hashLength, 0);
-					if (status != 0) throw std::runtime_error("Failed to finish hash");
+					if (status != 0)
+						throw std::runtime_error("Failed to finish hash");
 				}
 				catch (std::runtime_error e)
 				{
@@ -194,7 +199,7 @@ namespace raidhook
 				return ret;
 			}
 
-			if (!VerQueryValue(verData.data(), "\\", (VOID FAR * FAR *)&lpBuffer, &size))
+			if (!VerQueryValue(verData.data(), "\\", (VOID FAR * FAR*)&lpBuffer, &size))
 			{
 				return ret;
 			}
@@ -204,17 +209,15 @@ namespace raidhook
 				return ret;
 			}
 
-			VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
+			VS_FIXEDFILEINFO* verInfo = (VS_FIXEDFILEINFO*)lpBuffer;
 			if (verInfo->dwSignature != 0xfeef04bd)
 			{
 				return ret;
 			}
 
-			ret = std::format("{}.{}.{}.{}",
-												(verInfo->dwFileVersionMS >> 16) & 0xFFFF,
-												(verInfo->dwFileVersionMS >> 0) & 0xFFFF,
-												(verInfo->dwFileVersionLS >> 16) & 0xFFFF,
-												(verInfo->dwFileVersionLS >> 0) & 0xFFFF);
+			ret = std::format("{}.{}.{}.{}", (verInfo->dwFileVersionMS >> 16) & 0xFFFF,
+			                  (verInfo->dwFileVersionMS >> 0) & 0xFFFF, (verInfo->dwFileVersionLS >> 16) & 0xFFFF,
+			                  (verInfo->dwFileVersionLS >> 0) & 0xFFFF);
 			return ret;
 		}
 

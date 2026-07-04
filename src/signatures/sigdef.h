@@ -4,25 +4,25 @@
 #include "signatures.h"
 
 #define CREATE_NORMAL_CALLABLE_SIGNATURE(name, retn, signature, mask, offset, ...) \
-	typedef retn(*name ## ptr)(__VA_ARGS__); \
-	name ## ptr name = NULL; \
-	SignatureSearch name ## search(#name, &name, signature, mask, offset);
+	typedef retn (*name##ptr)(__VA_ARGS__);                                        \
+	name##ptr name = NULL;                                                         \
+	SignatureSearch name##search(#name, &name, signature, mask, offset);
 
 #define CREATE_CALLABLE_CLASS_SIGNATURE(name, retn, signature, mask, offset, ...) \
-	typedef retn(__thiscall *name ## ptr)(void*, __VA_ARGS__); \
-	name ## ptr name = NULL; \
-	SignatureSearch name ## search(#name, &name, signature, mask, offset);
+	typedef retn(__thiscall* name##ptr)(void*, __VA_ARGS__);                      \
+	name##ptr name = NULL;                                                        \
+	SignatureSearch name##search(#name, &name, signature, mask, offset);
 
 #else
 
 // If we're not being included directly from InitiateState.cpp, only declare, not define, variables
 #define CREATE_NORMAL_CALLABLE_SIGNATURE(name, retn, signature, mask, offset, ...) \
-	typedef retn(*name ## ptr)(__VA_ARGS__); \
-	extern name ## ptr name;
+	typedef retn (*name##ptr)(__VA_ARGS__);                                        \
+	extern name##ptr name;
 
 #define CREATE_CALLABLE_CLASS_SIGNATURE(name, retn, signature, mask, offset, ...) \
-	typedef retn(__thiscall *name ## ptr)(void*, __VA_ARGS__); \
-	extern name ## ptr name;
+	typedef retn(__thiscall* name##ptr)(void*, __VA_ARGS__);                      \
+	extern name##ptr name;
 
 #endif
 
@@ -35,8 +35,8 @@
 
 extern "C"
 {
-	#include <lauxlib.h>
-	#include <lua.h>
+#include <lauxlib.h>
+#include <lua.h>
 }
 
 #include "signatures/sigdef_game.h"

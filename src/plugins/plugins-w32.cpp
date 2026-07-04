@@ -1,13 +1,13 @@
-#include "plugins/plugins.h"
-#include "util/util.h"
 #include "InitState.h"
 #include "platform.h"
+#include "plugins/plugins.h"
+#include "util/util.h"
 
 using namespace std;
 using namespace blt::plugins;
 
-typedef void*(*lua_access_func_t)(const char*);
-typedef void(*init_func_t)(lua_access_func_t get_lua_func_by_name);
+typedef void* (*lua_access_func_t)(const char*);
+typedef void (*init_func_t)(lua_access_func_t get_lua_func_by_name);
 
 static void raid_log(const char* message, int level, const char* file, int line)
 {
@@ -32,12 +32,12 @@ static void raid_log(const char* message, int level, const char* file, int line)
 	}
 }
 
-static bool is_active_state(lua_State *L)
+static bool is_active_state(lua_State* L)
 {
 	return raidhook::check_active_state(L);
 }
 
-static void * get_func(const char* name)
+static void* get_func(const char* name)
 {
 	string str = name;
 
@@ -61,12 +61,15 @@ static void * get_func(const char* name)
 	return blt::platform::win32::get_lua_func(name);
 }
 
-class WindowsPlugin : public Plugin {
-public:
+class WindowsPlugin : public Plugin
+{
+  public:
 	WindowsPlugin(std::string file);
-protected:
-	virtual void *ResolveSymbol(std::string name) const;
-private:
+
+  protected:
+	virtual void* ResolveSymbol(std::string name) const;
+
+  private:
 	HMODULE module;
 };
 
@@ -74,23 +77,25 @@ WindowsPlugin::WindowsPlugin(std::string file) : Plugin(file)
 {
 	module = LoadLibrary(file.c_str());
 
-	if (!module) throw string("Failed to load module: ERR") + to_string(GetLastError());
+	if (!module)
+		throw string("Failed to load module: ERR") + to_string(GetLastError());
 
 	Init();
 
 	// Start loading everything
 	init_func_t init = (init_func_t)GetProcAddress(module, "SuperBLT_Plugin_Setup");
-	if (!init) throw "Invalid module - missing initfunc!";
+	if (!init)
+		throw "Invalid module - missing initfunc!";
 
 	init(get_func);
 }
 
-void *WindowsPlugin::ResolveSymbol(std::string name) const
+void* WindowsPlugin::ResolveSymbol(std::string name) const
 {
 	return GetProcAddress(module, name.c_str());
 }
 
-Plugin *blt::plugins::CreateNativePlugin(std::string file)
+Plugin* blt::plugins::CreateNativePlugin(std::string file)
 {
 	return new WindowsPlugin(file);
 }

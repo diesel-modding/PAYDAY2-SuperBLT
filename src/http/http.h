@@ -1,12 +1,12 @@
 #ifndef __HTTP_HEADER__
 #define __HTTP_HEADER__
 
-#include <string>
-#include <mutex>
-#include <thread>
 #include <list>
-#include <memory>
 #include <map>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
 
 namespace raidhook
 {
@@ -14,8 +14,8 @@ namespace raidhook
 	void download_blt();
 	struct HTTPItem;
 
-	typedef void(*HTTPCallback)(HTTPItem* httpItem);
-	typedef void(*HTTPProgress)(void* data, long progress, long total);
+	typedef void (*HTTPCallback)(HTTPItem* httpItem);
+	typedef void (*HTTPProgress)(void* data, long progress, long total);
 
 	struct HTTPItem
 	{
@@ -34,18 +34,19 @@ namespace raidhook
 
 	class HTTPManager
 	{
-	private:
+	  private:
 		HTTPManager();
 
-	public:
+	  public:
 		~HTTPManager();
 
 		static HTTPManager* GetSingleton();
 
 		void LaunchHTTPRequest(std::unique_ptr<HTTPItem> callback);
-	private:
+
+	  private:
 		std::list<std::unique_ptr<std::thread>> threadList;
 	};
-}
+} // namespace raidhook
 
 #endif // __HTTP_HEADER__

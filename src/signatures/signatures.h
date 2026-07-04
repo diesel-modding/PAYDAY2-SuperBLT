@@ -15,7 +15,7 @@ struct SignatureF
 
 class SignatureSearch
 {
-public:
+  public:
 	SignatureSearch(const char* funcname, void* address, const char* signature, const char* mask, int offset);
 	static bool Search();
 	static void* GetFunctionByName(const char* name);

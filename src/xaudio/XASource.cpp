@@ -26,7 +26,7 @@ namespace sblt
 		alSourcei(alhandle, AL_SOURCE_RELATIVE, relative ? AL_TRUE : AL_FALSE);
 	}
 
-	int xasource::lX_new_source(lua_State *L)
+	int xasource::lX_new_source(lua_State* L)
 	{
 		ALERR;
 
@@ -46,7 +46,8 @@ namespace sblt
 		// TODO expand stack to ensure we can't crash
 
 		// Error reporting
-		if (alGetError() == AL_OUT_OF_MEMORY) luaL_error(L, "blt.xaudio.newsource: OutOfMemory - did you create more than 256 sources?");
+		if (alGetError() == AL_OUT_OF_MEMORY)
+			luaL_error(L, "blt.xaudio.newsource: OutOfMemory - did you create more than 256 sources?");
 		ALERR;
 
 		for (size_t i = 0; i < count; i++)
@@ -55,7 +56,7 @@ namespace sblt
 			alSourcef(sources[i], AL_REFERENCE_DISTANCE, 5);
 			alSourcef(sources[i], AL_MAX_DISTANCE, 50);
 
-			XASource *buff = new XASource(sources[i]);
+			XASource* buff = new XASource(sources[i]);
 			openSources.insert(buff);
 			*(XALuaHandle*)lua_newuserdata(L, sizeof(XALuaHandle)) = XALuaHandle(buff);
 
@@ -69,11 +70,11 @@ namespace sblt
 
 	XA_CLASS_LUA_CLOSE(xasource::XASource, true);
 
-	int xasource::XASource_set_buffer(lua_State *L)
+	int xasource::XASource_set_buffer(lua_State* L)
 	{
 		ALERR;
 
-		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		XALuaHandle* xthis = (XALuaHandle*)lua_touserdata(L, 1);
 		// TODO validate 'valid' flag
 
 		bool nil = lua_isnil(L, 2);
@@ -84,7 +85,7 @@ namespace sblt
 		}
 		else
 		{
-			XALuaHandle *buff = (XALuaHandle*)lua_touserdata(L, 2);
+			XALuaHandle* buff = (XALuaHandle*)lua_touserdata(L, 2);
 			// TODO validate 'valid' flag
 			buffid = buff->Handle(L);
 		}
@@ -96,9 +97,9 @@ namespace sblt
 		return 0;
 	}
 
-	int xasource::XASource_play(lua_State *L)
+	int xasource::XASource_play(lua_State* L)
 	{
-		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		XALuaHandle* xthis = (XALuaHandle*)lua_touserdata(L, 1);
 		// TODO validate 'valid' flag
 
 		alSourcePlay(xthis->Handle(L));
@@ -107,9 +108,9 @@ namespace sblt
 		return 0;
 	}
 
-	int xasource::XASource_pause(lua_State *L)
+	int xasource::XASource_pause(lua_State* L)
 	{
-		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		XALuaHandle* xthis = (XALuaHandle*)lua_touserdata(L, 1);
 		// TODO validate 'valid' flag
 
 		alSourcePause(xthis->Handle(L));
@@ -118,9 +119,9 @@ namespace sblt
 		return 0;
 	}
 
-	int xasource::XASource_stop(lua_State *L)
+	int xasource::XASource_stop(lua_State* L)
 	{
-		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		XALuaHandle* xthis = (XALuaHandle*)lua_touserdata(L, 1);
 		// TODO validate 'valid' flag
 
 		alSourceStop(xthis->Handle(L));
@@ -129,9 +130,9 @@ namespace sblt
 		return 0;
 	}
 
-	int xasource::XASource_get_state(lua_State *L)
+	int xasource::XASource_get_state(lua_State* L)
 	{
-		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		XALuaHandle* xthis = (XALuaHandle*)lua_touserdata(L, 1);
 		// TODO validate 'valid' flag
 
 		ALint state;
@@ -162,32 +163,28 @@ namespace sblt
 		return 1;
 	}
 
-	static void set_vector_property(lua_State *L, ALenum type)
+	static void set_vector_property(lua_State* L, ALenum type)
 	{
-		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		XALuaHandle* xthis = (XALuaHandle*)lua_touserdata(L, 1);
 		// TODO validate 'valid' flag
 
-		alSource3f(
-		    xthis->Handle(L),
-		    type,
-		    WORLD_VEC(L, 2, 3, 4)
-		);
+		alSource3f(xthis->Handle(L), type, WORLD_VEC(L, 2, 3, 4));
 		ALERR;
 	}
 
-	int xasource::XASource_set_position(lua_State *L)
+	int xasource::XASource_set_position(lua_State* L)
 	{
 		set_vector_property(L, AL_POSITION);
 		return 0;
 	}
 
-	int xasource::XASource_set_velocity(lua_State *L)
+	int xasource::XASource_set_velocity(lua_State* L)
 	{
 		set_vector_property(L, AL_VELOCITY);
 		return 0;
 	}
 
-	int xasource::XASource_set_direction(lua_State *L)
+	int xasource::XASource_set_direction(lua_State* L)
 	{
 		// FIXME doesn't *seem* to work?
 		set_vector_property(L, AL_DIRECTION);
@@ -216,9 +213,9 @@ namespace sblt
 		return 0;
 	}
 
-	int xasource::XASource_get_gain(lua_State * L)
+	int xasource::XASource_get_gain(lua_State* L)
 	{
-		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		XALuaHandle* xthis = (XALuaHandle*)lua_touserdata(L, 1);
 		// TODO validate 'valid' flag
 
 		ALfloat value;
@@ -229,9 +226,9 @@ namespace sblt
 		return 1;
 	}
 
-	int xasource::XASource_set_gain(lua_State * L)
+	int xasource::XASource_set_gain(lua_State* L)
 	{
-		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		XALuaHandle* xthis = (XALuaHandle*)lua_touserdata(L, 1);
 		// TODO validate 'valid' flag
 
 		ALfloat value = lua_tonumber(L, 2);
@@ -243,6 +240,6 @@ namespace sblt
 
 	XA_CLASS_LUA_METHOD_VOID(xasource::XASource, SetLooping, lua_toboolean(L, 2));
 	XA_CLASS_LUA_METHOD_VOID(xasource::XASource, SetRelative, lua_toboolean(L, 2));
-};
+}; // namespace sblt
 
 #endif
