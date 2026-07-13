@@ -5,16 +5,41 @@
 
 #include "XAudioInternal.h"
 
+#ifndef ALC_ALL_DEVICES_SPECIFIER // ALC_ENUMERATE_ALL_EXT
+
+#define ALC_ALL_DEVICES_SPECIFIER 0x1013
+
+#endif
+
+#ifndef ALC_DEFAULT_ALL_DEVICES_SPECIFIER
+
+#define ALC_DEFAULT_ALL_DEVICES_SPECIFIER 0x1012
+
+#endif
+
+#ifndef ALC_CONNECTED // ALC_EXT_disconnect
+
+#define ALC_CONNECTED 0x313
+
+#endif
+
+
+
 namespace pd2hook
 {
 	namespace xaudio
 	{
+		static LPALCREOPENDEVICESOFT palcReopenDeviceSOFT = nullptr;
+		static bool has_disconnect_ext = false;
+		static bool has_all_devices_ext = false;
 		double world_scale = 1;
 
 		map<string, xabuffer::XABuffer*> openBuffers;
 		unordered_set<xasource::XASource*> openSources;
 
 		bool is_setup = false;
+		
+		
 	};
 
 	using namespace xaudio;
@@ -115,6 +140,45 @@ namespace pd2hook
 		return 0;
 	}
 
+	static int lX_checkdevice(lua_State* L)
+	{
+		// Never force XAudio to initialise just because someone polls;
+		// if no mod has opened the device there is nothing to follow.
+		if (!is_setup)
+		{
+			lua_pushboolean(L, false);
+			return 1;
+		}
+		lua_pushboolean(L, XAudio::GetXAudioInstance()->CheckDevice(false));
+		return 1;
+	}
+
+	static int lX_reopendevice(lua_State* L)
+	{
+		if (!is_setup)
+		{
+			lua_pushboolean(L, false);
+			return 1;
+		}
+		lua_pushboolean(L, XAudio::GetXAudioInstance()->CheckDevice(true));
+		return 1;
+	}
+
+	static int lX_getdevicename(lua_State* L)
+	{
+		if (!is_setup)
+		{
+			lua_pushnil(L);
+			return 1;
+		}
+		const char* name = XAudio::GetXAudioInstance()->GetDeviceName();
+		if (name)
+			lua_pushstring(L, name);
+		else
+			lua_pushnil(L);
+		return 1;
+	}
+
 	XAudio::XAudio()
 	{
 		ALCint attributes[] = {
@@ -138,6 +202,23 @@ namespace pd2hook
 		}
 
 		alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+	
+		if (alcIsExtensionPresent(dev, "ALC_SOFT_reopen_device"))
+		{
+			palcReopenDeviceSOFT = (LPALCREOPENDEVICESOFT)alcGetProcAddress(dev, "alcReopenDeviceSOFT");
+		}
+		has_disconnect_ext = alcIsExtensionPresent(dev, "ALC_EXT_disconnect") == ALC_TRUE;
+		has_all_devices_ext = alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") == ALC_TRUE;
+
+		if (palcReopenDeviceSOFT)
+		{
+			PD2HOOK_LOG_LOG("XAudio: ALC_SOFT_reopen_device available, will follow default audio device changes");
+		}
+		else
+		{
+			PD2HOOK_LOG_WARN("XAudio: ALC_SOFT_reopen_device NOT available (OpenAL Soft older than 1.22); "
+			                 "sounds will not survive audio device changes");
+		}
 
 		PD2HOOK_LOG_LOG("Loaded OpenAL XAudio API");
 	}
@@ -248,6 +329,9 @@ namespace pd2hook
 			{ "newsource", xasource::lX_new_source },
 			{ "getworldscale", lX_getworldscale },
 			{ "setworldscale", lX_setworldscale },
+		    {"checkdevice", lX_checkdevice},
+		    {"reopendevice", lX_reopendevice},
+			{"getdevicename", lX_getdevicename},
 			{ NULL, NULL }
 		};
 
@@ -268,6 +352,67 @@ namespace pd2hook
 
 		// Remove the BLT table from the stack.
 		lua_pop(L, 1);
+	}
+
+	bool XAudio::CheckDevice(bool force_reopen)
+	{
+		if (!palcReopenDeviceSOFT)
+			return false;
+
+		// Back off after a failed reopen so we don't hammer WASAPI every poll
+		static int backoff = 0;
+		if (backoff > 0 && !force_reopen)
+		{
+			backoff--;
+			return false;
+		}
+
+		bool want_reopen = force_reopen;
+
+		// 1) Device invalidated? (endpoint removed or its format changed)
+		if (!want_reopen && has_disconnect_ext)
+		{
+			ALCint connected = ALC_TRUE;
+			alcGetIntegerv(dev, ALC_CONNECTED, 1, &connected);
+			alcGetError(dev);
+			if (!connected)
+				want_reopen = true;
+		}
+
+		// 2) Windows default output changed underneath us?
+		if (!want_reopen)
+		{
+			ALCenum def_spec = has_all_devices_ext ? ALC_DEFAULT_ALL_DEVICES_SPECIFIER : ALC_DEFAULT_DEVICE_SPECIFIER;
+			ALCenum cur_spec = has_all_devices_ext ? ALC_ALL_DEVICES_SPECIFIER : ALC_DEVICE_SPECIFIER;
+
+			const ALCchar* def = alcGetString(NULL, def_spec);
+			const ALCchar* cur = alcGetString(dev, cur_spec);
+			if (def && cur && strcmp(def, cur) != 0)
+				want_reopen = true;
+		}
+
+		if (!want_reopen)
+			return false;
+
+		// Reopen on the current default; all buffers, sources and the context
+		// survive the move, so playing sounds simply continue on the new output.
+		if (palcReopenDeviceSOFT(dev, NULL, NULL))
+		{
+			const char* name = GetDeviceName();
+			PD2HOOK_LOG_LOG(string("XAudio: moved OpenAL output to: ") + (name ? name : "(unknown device)"));
+			backoff = 0;
+			return true;
+		}
+
+		PD2HOOK_LOG_WARN("XAudio: alcReopenDeviceSOFT failed, will retry later");
+		backoff = 5;
+		return false;
+	}
+
+	const char* XAudio::GetDeviceName()
+	{
+		ALCenum cur_spec = has_all_devices_ext ? ALC_ALL_DEVICES_SPECIFIER : ALC_DEVICE_SPECIFIER;
+		return alcGetString(dev, cur_spec);
 	}
 
 }

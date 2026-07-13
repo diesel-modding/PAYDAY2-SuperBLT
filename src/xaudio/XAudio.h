@@ -11,6 +11,8 @@ namespace pd2hook
 	{
 	public:
 		static void Register(void *state);
+		bool CheckDevice(bool force_reopen);
+		const char* GetDeviceName();
 
 		// Please don't use, for internal use only
 		static XAudio* GetXAudioInstance();
