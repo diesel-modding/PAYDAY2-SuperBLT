@@ -135,6 +135,7 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, Archive
 
 		archive->datastore = new BLTFormatConversionDataStore([](std::vector<uint8_t>&& data) { 
 			Wwise::Soundbank bnk(data.data(), data.size());
+			data.clear();
 			bnk.Convert(Wwise::BankVersion::V2022, data);
 			return std::move(data);
 		}, archive->datastore, archive->datastoreRefCountId);
