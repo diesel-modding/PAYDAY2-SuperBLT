@@ -167,6 +167,20 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, Archive
 		// Don't attempt any further format conversion.
 		return;
 	}
+
+	if (*type == blt::idstring_hash("bnk"))
+	{
+		// The soundbanks can be quite big, so it's probably best not to load them into memory
+		// immediately ourselves if they're already 64-bit.
+		// (though the game will ultimately do this anyway, we're just saving a memcpy)
+		if (CheckWwiseSoundbankRequiresConversion(archive->datastore))
+		{
+			ConvertData(archive, ConvertWwiseSoundbank);
+		}
+
+		// Don't attempt any further format conversion.
+		return;
+	}
 }
 
 static void setup_extra_asset_hooks()

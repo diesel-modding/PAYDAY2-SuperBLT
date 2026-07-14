@@ -25,3 +25,6 @@
 [submodule "lib/DieselFormats"]
 	path = lib/DieselFormats
 	url = https://github.com/HW12Dev/DieselFormats.git
+[submodule "lib/diesel-wwise-bnk-version-converter"]
+	path = lib/diesel-wwise-bnk-version-converter
+	url = https://github.com/Javgarag/diesel-wwise-bnk-version-converter.git
