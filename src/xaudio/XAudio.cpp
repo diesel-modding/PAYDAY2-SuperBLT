@@ -32,6 +32,7 @@ namespace pd2hook
 		static LPALCREOPENDEVICESOFT palcReopenDeviceSOFT = nullptr;
 		static bool has_disconnect_ext = false;
 		static bool has_all_devices_ext = false;
+		static std::string last_default_name;
 		double world_scale = 1;
 
 		map<string, xabuffer::XABuffer*> openBuffers;
@@ -221,6 +222,12 @@ namespace pd2hook
 		}
 
 		PD2HOOK_LOG_LOG("Loaded OpenAL XAudio API");
+
+		if (const ALCchar* def =
+			alcGetString(NULL, has_all_devices_ext ? ALC_DEFAULT_ALL_DEVICES_SPECIFIER : ALC_DEFAULT_DEVICE_SPECIFIER))
+		{
+			last_default_name = def;
+		}
 	}
 
 	XAudio::~XAudio()
@@ -361,6 +368,9 @@ namespace pd2hook
 
 		// Back off after a failed reopen so we don't hammer WASAPI every poll
 		static int backoff = 0;
+		static int confirm_polls = 0;
+		static std::string pending_name;
+
 		if (backoff > 0 && !force_reopen)
 		{
 			backoff--;
@@ -379,16 +389,42 @@ namespace pd2hook
 				want_reopen = true;
 		}
 
-		// 2) Windows default output changed underneath us?
+		// 2) Has the system default changed since we last (re)opened?
+		// Compare against our own history of the default-device string rather
+		// than the opened device's specifier: the two query paths can format
+		// the same endpoint's name differently, which would cause a reopen
+		// loop. Require the new default to be stable for two consecutive
+		// polls to ignore transient flapping during device negotiation.
 		if (!want_reopen)
 		{
 			ALCenum def_spec = has_all_devices_ext ? ALC_DEFAULT_ALL_DEVICES_SPECIFIER : ALC_DEFAULT_DEVICE_SPECIFIER;
-			ALCenum cur_spec = has_all_devices_ext ? ALC_ALL_DEVICES_SPECIFIER : ALC_DEVICE_SPECIFIER;
-
 			const ALCchar* def = alcGetString(NULL, def_spec);
-			const ALCchar* cur = alcGetString(dev, cur_spec);
-			if (def && cur && strcmp(def, cur) != 0)
-				want_reopen = true;
+			if (!def)
+				return false;
+
+			if (last_default_name.empty())
+			{
+				last_default_name = def;
+				return false;
+			}
+
+			if (last_default_name == def)
+			{
+				confirm_polls = 0;
+				return false;
+			}
+
+			if (pending_name != def)
+			{
+				pending_name = def;
+				confirm_polls = 1;
+				return false;
+			}
+
+			if (++confirm_polls < 2)
+				return false;
+
+			want_reopen = true;
 		}
 
 		if (!want_reopen)
@@ -398,6 +434,12 @@ namespace pd2hook
 		// survive the move, so playing sounds simply continue on the new output.
 		if (palcReopenDeviceSOFT(dev, NULL, NULL))
 		{
+			ALCenum def_spec = has_all_devices_ext ? ALC_DEFAULT_ALL_DEVICES_SPECIFIER : ALC_DEFAULT_DEVICE_SPECIFIER;
+			if (const ALCchar* def = alcGetString(NULL, def_spec))
+				last_default_name = def;
+			confirm_polls = 0;
+			pending_name.clear();
+
 			const char* name = GetDeviceName();
 			PD2HOOK_LOG_LOG(string("XAudio: moved OpenAL output to: ") + (name ? name : "(unknown device)"));
 			backoff = 0;
