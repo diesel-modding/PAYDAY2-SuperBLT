@@ -181,6 +181,16 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, Archive
 		// Don't attempt any further format conversion.
 		return;
 	}
+
+	if(*type == blt::idstring_hash("animation"))
+	{
+		// HW12Dev: It's okay to read them all and decompress them from crates anyways, the memory usage is the same either way
+
+		ConvertData(archive, ConvertAnimation);
+
+		// Don't attempt any further format conversion.
+		return;
+	}
 }
 
 static void setup_extra_asset_hooks()
