@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
 	// init curl
 	CURL *curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
 	//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // debug
 	char errbuf[CURL_ERROR_SIZE];
 	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
