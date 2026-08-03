@@ -61,8 +61,7 @@ namespace raidhook
 		if (delimiterPosition != std::string::npos)
 		{
 			std::string headerKey = headerLine.substr(0, delimiterPosition);
-			std::string lowerHeaderKey = headerKey;
-			std::transform(lowerHeaderKey.begin(), lowerHeaderKey.end(), lowerHeaderKey.begin(), std::tolower);
+			std::transform(headerKey.begin(), headerKey.end(), headerKey.begin(), [](unsigned char c) { return std::tolower(c); });
 			std::string headerValue = headerLine.substr(delimiterPosition + 2);
 			size_t valLen = headerValue.length();
 			if (valLen > 2 && headerValue.at(valLen - 1) == '\n' && headerValue.at(valLen - 2) == '\r')
@@ -70,10 +69,6 @@ namespace raidhook
 				headerValue = headerValue.substr(0, valLen - 2);
 			}
 			mainItem->responseHeaders.insert({headerKey, headerValue});
-			if (headerKey != lowerHeaderKey)
-			{
-				mainItem->responseHeaders.insert({lowerHeaderKey, headerValue});
-			}
 		}
 		return headerLineSize;
 	}

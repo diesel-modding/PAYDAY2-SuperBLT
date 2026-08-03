@@ -313,6 +313,22 @@ namespace raidhook
 		lua_State* L;
 	};
 
+	static int http_headers_index(lua_State* L)
+	{
+		if (!lua_isstring(L, 2))
+		{
+			lua_pushnil(L);
+			return 1;
+		}
+
+		std::string key = lua_tostring(L, 2);
+		std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return std::tolower(c); });
+
+		lua_pushlstring(L, key.c_str(), key.size());
+		lua_rawget(L, 1);
+		return 1;
+	}
+
 	static void return_lua_http(HTTPItem* httpItem)
 	{
 		lua_http_data* ourData = (lua_http_data*)httpItem->data;
@@ -345,6 +361,10 @@ namespace raidhook
 			lua_pushstring(ourData->L, element.second.c_str());
 			lua_settable(ourData->L, -3);
 		}
+		lua_newtable(ourData->L); // headers metatable
+		lua_pushcfunction(ourData->L, http_headers_index);
+		lua_setfield(ourData->L, -2, "__index");
+		lua_setmetatable(ourData->L, -2);
 		lua_settable(ourData->L, -3);
 		handled_pcall(ourData->L, 3, 0);
 		luaL_unref(ourData->L, LUA_REGISTRYINDEX, ourData->funcRef);
