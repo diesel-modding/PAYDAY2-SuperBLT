@@ -1,20 +1,24 @@
-# RAID-SuperBLT ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/RAIDModding/RAID-SuperBLT/create_build.yml)
+# PAYDAY2-SuperBLT (64 Bit) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/diesel-modding/PAYDAY2-SuperBLT/create_build.yml)
 
-An open-source Lua hook for RAID: World War II, designed and created for ease of use for both players and modders.
+An open-source Lua hook for PAYDAY 2, designed and created for ease of use for both players and modders.
 
 This is an unofficial continuation of the BLT and SuperBLT mod loader for PAYDAY 2, with additional features aimed at allowing things
 not possible in standard Lua, such as patching XML files that are loaded directly by the engine or playing
 3D sounds.
 
-This is the developer repository and should only be used if you know what you're doing. If you don't, visit the website at [modworkshop.net: RAID-SuperBLT](https://modworkshop.net/mod/49744) for an up-to-date drag-drop install.
-The Lua component of the BLT, which controls mod loading, can be found in its own repository, [GitHub: RAIDModding/RAID-SuperBLT-Lua](https://github.com/RAIDModding/RAID-SuperBLT-Lua).
+This is the developer repository and should only be used if you know what you're doing. ~~If you don't, visit the website at [modworkshop.net: PAYDAY 2-SuperBLT](https://modworkshop.net/mod/49744) for an up-to-date drag-drop install.~~
+The Lua component of the BLT, which controls mod loading, can be found in its own repository, [GitHub: diesel-modding/PAYDAY2-SuperBLT-Lua](https://github.com/diesel-modding/PAYDAY2-SuperBLT-Lua).
 
 ## Download
-Visit ![modworkshop.net: RAID-SuperBLT](https://modworkshop.net/mod/49744) to get the latest stable download. 
+~~Visit ![modworkshop.net: PAYDAY 2-SuperBLT](https://modworkshop.net/mod/49744) to get the latest stable download.~~
+
+Visit here to download the latest build: [Nightly.link: Nightly Release](https://nightly.link/diesel-modding/PAYDAY2-SuperBLT/workflows/create_build/master/Build%20Artifacts.zip)
+
+You will need to also install the Base mod from: [GitHub: diesel-modding/PAYDAY2-SuperBLT-Lua](https://github.com/diesel-modding/PAYDAY2-SuperBLT-Lua) into your mods folder.
 
 ## Documentation
 
-Documentation for SuperBLT can be found on the [SuperBLT Website](https://superblt.znix.xyz). (ignore everything related to XAudio! We don't have that in RAID.)
+Documentation for SuperBLT can be found on the [SuperBLT Website](https://superblt.znix.xyz). (ignore everything related to XAudio! It has been deprecated.)
 
 ## Development
 
@@ -23,7 +27,7 @@ How to contribute to SuperBLT:
 First, clone this repository and pull all required projects and repositories into one folder (Note: You **NEED** to do this, otherwise you'll get runtime and compile errors):
 
 ```
-git clone --recursive https://github.com/RAIDModding/RAID-SuperBLT.git
+git clone --recursive https://github.com/diesel-modding/PAYDAY2-SuperBLT.git
 ```
 
 if you cloned without `--recursive`, do this in the root of your repo:
@@ -49,9 +53,9 @@ If you don't see the solution file, please ensure the configurations have `Visua
 At this point, you can compile your project. In Visual Studio, press F7.
 This will take some time as it compiles all of SuperBLT's dependencies and, finally, SuperBLT itself.
 
-Finally, you can make RAID use your custom-built version of SBLT instead of having to copy the built
-file to the RAID directory each time you change something.
-Go to your `RAID World War II` directory and open PowerShell to do this. Run:
+Finally, you can make PAYDAY 2 use your custom-built version of SBLT instead of having to copy the built
+file to the PAYDAY 2 directory each time you change something.
+Go to your `PAYDAY 2 directory and open PowerShell to do this. Run:
 
 ```
 cmd /c mklink WSOCK32.dll <path to SBLT>\out\build\x64-Debug\WSOCK32.dll
@@ -66,7 +70,7 @@ Then enter the following commands:
 
 `msbuild SuperBLT.sln /t:Build /p:Configuration=Debug`
 
-You can symlink using the following in your `RAID World War II` directory. Run:
+You can symlink using the following in your `PAYDAY 2` directory. Run:
 
 ```
 cmd /c mklink WSOCK32.dll <path to SBLT>\build\Debug\WSOCK32.dll
