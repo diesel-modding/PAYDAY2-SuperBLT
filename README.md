@@ -55,7 +55,7 @@ This will take some time as it compiles all of SuperBLT's dependencies and, fina
 
 Finally, you can make PAYDAY 2 use your custom-built version of SBLT instead of having to copy the built
 file to the PAYDAY 2 directory each time you change something.
-Go to your `PAYDAY 2 directory and open PowerShell to do this. Run:
+Go to your `PAYDAY 2` directory and open PowerShell to do this. Run:
 
 ```
 cmd /c mklink WSOCK32.dll <path to SBLT>\out\build\x64-Debug\WSOCK32.dll
