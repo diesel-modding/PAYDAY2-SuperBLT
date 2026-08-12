@@ -4,6 +4,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 
 #include <mutex>
 
@@ -191,18 +192,18 @@ namespace raidhook
 
 		LogWriter::LogWriter(LogType msgType)
 		{
-			*this << LogTime << msgType << ' ';
+			*this << LogTime << msgType;
 		}
 
 		LogWriter::LogWriter(const char* file, int line, LogType msgType)
 		{
 			if (line && line > 0)
 			{
-				*this << LogTime << msgType << " (" << file << ':' << line << ") ";
+				*this << LogTime << msgType << "(" << std::filesystem::path(file).filename().string() << ':' << line << ") ";
 			}
 			else if (file)
 			{
-				*this << LogTime << msgType << " (" << file << ") ";
+				*this << LogTime << msgType << "(" << std::filesystem::path(file).filename().string() << ") ";
 			}
 			else
 			{
