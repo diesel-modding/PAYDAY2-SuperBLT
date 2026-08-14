@@ -1,79 +1,101 @@
 #pragma once
 
-#include "Datastore.h"
-#include "platform.h"
+#include "../platform.h"
 
-#include <istream>
-#include <map>
 #include <vector>
 
-namespace blt::db
+namespace diesel {
+
+    template<typename T1, typename T2> struct Pair
+	{
+		T1 first;
+		T2 second;
+    };
+
+    template<typename T> class Vector
+	{
+	private:
+		size_t _size;
+		size_t _capacity;
+		T* _data;
+		void* _allocator;
+	public:
+
+		T* begin()
+		{
+			return _data;
+		}
+		T* end()
+		{
+			return _data + _size;
+		}
+		const T* begin() const
+		{
+			return _data;
+		}
+		const T* end() const
+		{
+			return _data + _size;
+		}
+
+		const T& operator[](size_t i) const
+		{
+			return _data[i];
+		}
+
+		T& operator[](size_t i)
+		{
+			return _data[i];
+		}
+	};
+
+    template<typename K, typename V> class SortMap
+	{
+	public:
+		typedef Pair<K, V> VectorType;
+    private:
+		char _less[8];
+		Vector<VectorType> _data;
+		bool _is_sorted;
+
+	public:
+		const Vector<VectorType>& data() const { return _data; }
+		Vector<VectorType>& data() { return _data; }
+    };
+
+	struct DBExtKey
+	{
+		blt::idstring type;
+		blt::idstring name;
+		uint32_t properties;
+	};
+
+    class DB
+    {
+    private:
+		struct Data
+		{
+		public:
+			SortMap<blt::idstring, uint32_t> _properties;
+			SortMap<DBExtKey, uint32_t> _lookup;
+			uint32_t _next_key;
+        };
+
+
+        char PAD[96];
+		Data* _data;
+
+	public:
+		static DB* GetDB();
+
+		bool ContainsFile(blt::idstring type, blt::idstring name, blt::idstring property);
+		bool OpenFile(blt::idstring type, blt::idstring name, blt::idstring property, std::vector<uint8_t>& out_data);
+
+    };
+
+}
+
+namespace blt
 {
-	struct DieselBundle
-	{
-	  public:
-		std::string path;
-		std::string headerPath;
-		size_t DecompressedFileSize;
-		std::vector<size_t> ChunkOffsets;
-	};
-
-	struct DslFile
-	{
-	  public:
-		idstring name;
-		idstring type;
-		int fileId;
-		int rawLangId;
-		idstring langId;
-
-		/**
-		 * If there are multiple of this kind of asset, but in different languages, then this
-		 * points to another file with the same name/type but a different language.
-		 */
-		DslFile* next = nullptr;
-
-		// These are used for reading, and are picked up from the bundle headers
-		DieselBundle* bundle = nullptr;
-		unsigned int offset = ~0u;
-		unsigned int length = ~0u;
-
-		[[nodiscard]] bool Found() const
-		{
-			return bundle != nullptr;
-		}
-
-		[[nodiscard]] bool HasLength() const
-		{
-			return length != ~0u;
-		}
-
-		[[nodiscard]] std::pair<idstring, idstring> Key() const
-		{
-			return std::pair<idstring, idstring>(name, type);
-		}
-
-		[[nodiscard]] std::vector<uint8_t> ReadContents(std::istream& fi) const;
-	};
-
-	class DieselDB
-	{
-	  private:
-		DieselDB();
-
-	  public:
-		DieselDB(const DieselDB&) = delete;
-		DieselDB& operator=(const DieselDB&) = delete;
-
-		DslFile* Find(idstring name, idstring ext);
-
-		static DieselDB* Instance();
-
-		BLTAbstractDataStore* Open(DieselBundle* bundle);
-
-	  private:
-		std::vector<DslFile> filesList;
-		std::map<std::pair<idstring, idstring>, DslFile*> files;
-	};
-
-}; // namespace blt::db
+	void InitDBHooks();
+}

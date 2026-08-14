@@ -88,6 +88,11 @@ struct Archive
 	BLTAbstractDataStore* datastore;
 	int datastoreRefCountId;
 
+	size_t size() const
+	{
+		return length;
+	}
+
 	static Archive* Constructor(Archive* archive, const std::string& name, BLTAbstractDataStore* datastore, int64_t pos,
 	                            int64_t len, bool probablyNotLoadedFlag = false);
 };

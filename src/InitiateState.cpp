@@ -6,7 +6,6 @@
 #include "lua_functions.h"
 #include "platform.h"
 
-#include "dbutil/DB.h"
 #include "http/http.h"
 #include "luautil/LuaAssetDb.h"
 #include "luautil/LuaAsyncIO.h"

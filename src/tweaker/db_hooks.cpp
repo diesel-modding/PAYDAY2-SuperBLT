@@ -2,11 +2,11 @@
 // Created by ZNix on 23/11/2020.
 //
 
+#include "../dbutil/DB.h"
 #include "db_hooks.h"
 #include "wrenloader.h"
 #include "xmltweaker_internal.h"
 
-#include <dbutil/DB.h>
 #include <platform.h>
 #include <util/util.h>
 
@@ -18,9 +18,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-
-using blt::db::DieselDB;
-using blt::db::DslFile;
 
 static const char* MODULE = "base/native/DB_001";
 
@@ -257,55 +254,17 @@ static void wrenLoadAssetContents(WrenVM* vm)
 	blt::idstring name = parseHash(wrenGetSlotString(vm, 1));
 	blt::idstring ext = parseHash(wrenGetSlotString(vm, 2));
 
-	DslFile* file = DieselDB::Instance()->Find(name, ext);
+	std::vector<uint8_t> contents;
+	bool success = diesel::DB::GetDB()->OpenFile(ext, name, idstring_none, contents);
 
-	if (file == nullptr)
-	{
-		wrenSetSlotNull(vm, 0);
-		return;
-	}
-
-	if (!file->HasLength() || !file->Found())
+	if (!success)
 	{
 		wrenSetSlotString(vm, 0, "Failed to read bundle file, bundle or length not set? Please report to SBLT");
 		wrenAbortFiber(vm, 0);
 		return;
 	}
-
-	// Ahh yes, be sure to enable binary mode
-	// Otherwise stream.read will fail on Windows with failbit set, and won't touch errno
-	// I think I'm getting better at tracking this exact same problem down - this time, it only wasted a
-	// few perfectly good hours of my time.
-	std::ifstream stream(file->bundle->path, std::ios::binary);
-	if (stream.fail())
-	{
-		std::string msg = "Failed to open bundle file containing the asset - " + file->bundle->path;
-		wrenSetSlotString(vm, 0, msg.c_str());
-		wrenAbortFiber(vm, 0);
-		return;
-	}
-
-	// Make sure errno is clear before we do anything, so in some unlikely cornercase where an operation fails without
-	// setting errno it doesn't have some leftover number.
-	errno = 0;
-
-	try
-	{
-		stream.exceptions(std::ios::failbit | std::ios::eofbit);
-
-		std::vector<uint8_t> data = file->ReadContents(stream);
-
-		wrenSetSlotBytes(vm, 0, (const char*)data.data(), data.size());
-	}
-	catch (const std::ios::failure& ex)
-	{
-		char err_buff[128];
-		strerror_s(err_buff, sizeof(err_buff), errno);
-		std::string msg =
-			std::string("Failed to read asset - IO error: ") + std::string(err_buff) + " " + std::string(ex.what());
-		wrenSetSlotString(vm, 0, msg.c_str());
-		wrenAbortFiber(vm, 0);
-	}
+	
+	wrenSetSlotBytes(vm, 0, (const char*)contents.data(), contents.size());
 }
 
 bool raidhook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BLTAbstractDataStore** out_datastore,
@@ -358,6 +317,8 @@ bool raidhook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, B
 
 	auto load_bundle_item = [&](blt::idfile bundle_item)
 	{
+		__debugbreak(); // HW12Dev: if someone crashes here, add the db reading. but i dont think this is ever used
+		/*
 		DslFile* file = DieselDB::Instance()->Find(bundle_item.name, bundle_item.ext);
 
 		// Abort if the file isn't found - most likely this would lead to a crash anyway since the RAID version
@@ -385,6 +346,7 @@ bool raidhook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, B
 			*out_len = file->length;
 		else
 			*out_len = ds->size() - file->offset;
+		*/
 	};
 
 	if (target.plain_file)

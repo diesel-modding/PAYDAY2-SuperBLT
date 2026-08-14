@@ -8,6 +8,7 @@
 #include "assets.h"
 #include "platform.h"
 #include "subhook.h"
+#include "../dbutil/DB.h"
 
 #include <stdio.h>
 
@@ -110,6 +111,7 @@ void blt::win32::InitAssets()
 	SETUP_PASSTHROUGH(try_open_property_match_resolver);
 
 	setup_extra_asset_hooks();
+	blt::InitDBHooks();
 
 	
 	WwDevice_loadBankIdstringDetour.Install(sound_WwDevice__load_bank_idstring, &sound_WwDevice__load_bank_idstring_h, HOOK_FLAG);

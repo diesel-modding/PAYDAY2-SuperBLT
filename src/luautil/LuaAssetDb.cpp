@@ -4,7 +4,6 @@
 
 #include "LuaAssetDb.h"
 
-#include <dbutil/DB.h>
 #include <errno.h>
 #include <fstream>
 #include <inttypes.h>
@@ -13,9 +12,6 @@
 #include <util/util.h>
 
 using blt::idstring;
-using blt::db::DieselBundle;
-using blt::db::DieselDB;
-using blt::db::DslFile;
 
 static idstring to_idstring(lua_State* L, int idx, const char* err_name = nullptr)
 {
@@ -58,100 +54,6 @@ static idstring to_idstring(lua_State* L, int idx, const char* err_name = nullpt
 	}
 
 	return blt::idstring_hash(str);
-}
-
-static DslFile* find_file(lua_State* L)
-{
-	idstring name = to_idstring(L, 1);
-	idstring ext = to_idstring(L, 2);
-
-	// 3rd arg is an options table
-	idstring lang = 0;
-	if (lua_istable(L, 3))
-	{
-		lua_getfield(L, 3, "language");
-		// Use toboolean instead of isnil to supplying false is the same as nil
-		if (lua_toboolean(L, -1))
-			lang = to_idstring(L, -1, "options.language");
-		lua_pop(L, 1);
-	}
-
-	DslFile* file = DieselDB::Instance()->Find(name, ext);
-
-	// If it's not found, stop here - otherwise we'll crash when finding the language ID
-	if (!file)
-		return nullptr;
-
-	// Iterate though the different language versions of this file, until we find the one we need
-	for (DslFile* fi = file; fi; fi = fi->next)
-	{
-		if (fi->langId == lang)
-			return fi;
-	}
-
-	// Can't find anything with the correct language
-	return nullptr;
-}
-
-static int ldb_load(lua_State* L)
-{
-	idstring name = to_idstring(L, 1);
-	idstring ext = to_idstring(L, 2);
-
-	bool optional = false; // Is it valid for the file to not exist?
-
-	if (lua_istable(L, 3))
-	{
-		lua_getfield(L, 3, "optional");
-		optional = lua_toboolean(L, -1);
-		lua_pop(L, 1);
-	}
-
-	DslFile* file = find_file(L);
-
-	if (!file) // Asset does not exist
-	{
-		if (optional)
-		{
-			lua_pushnil(L);
-			return 1;
-		}
-
-		char msg[1024];
-		snprintf(msg, sizeof(msg) - 1, "AssetDB: could not load asset " IDPFP " - not found in database", name, ext);
-		luaL_error(L, msg);
-		return 0; // Placate CLion's null warning thing, luaL_error never returns
-	}
-
-	errno = 0;
-	try
-	{
-		if (file->bundle == nullptr)
-		{
-			luaL_error(L, "Failed to read bundle: no bundle setted");
-			return 0;
-		}
-
-		std::ifstream fi;
-		fi.exceptions(std::ios::failbit);
-		fi.open(file->bundle->path, std::ios::binary);
-
-		std::vector<uint8_t> data = file->ReadContents(fi);
-		lua_pushlstring(L, (const char*)data.data(), data.size());
-		return 1;
-	}
-	catch (const std::ios::failure& ex)
-	{
-		luaL_error(L, "Failed to read bundle: io error: %s", strerror(errno));
-		return 0; // Will never happen, luaL_error does not return
-	}
-}
-
-static int ldb_has(lua_State* L)
-{
-	DslFile* file = find_file(L);
-	lua_pushboolean(L, file != nullptr);
-	return 1;
 }
 
 // register a custom Wwise soundbank so that Diesel can load it
@@ -209,9 +111,6 @@ void load_lua_asset_db(lua_State* L)
 {
 	// (note: ldb = Lua asset DB)
 	luaL_Reg vmLib[] = {
-		{"read_file", ldb_load},
-		{"has_file", ldb_has},
-
 		{"register_custom_soundbank", ldb_register_custom_soundbank},
 		{"unregister_custom_soundbank", ldb_unregister_custom_soundbank},
 		{"register_custom_streamed_wem", ldb_register_custom_streamed_wem},

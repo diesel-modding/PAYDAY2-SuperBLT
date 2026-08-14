@@ -63,3 +63,5 @@ class BLTStringDataStore : public BLTAbstractDataStore
   private:
 	std::vector<uint8_t> contents;
 };
+
+void DeleteDatastore(BLTAbstractDataStore* datastore, int refcountId);

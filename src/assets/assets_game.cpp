@@ -63,23 +63,6 @@ static std::unordered_set<blt::idstring> GetScriptdataTypes()
 
 static const std::unordered_set<blt::idstring> SCRIPTDATA_TYPES = GetScriptdataTypes();
 
-static void DeleteDatastore(BLTAbstractDataStore* datastore, int refcountId)
-{
-	// Do the same thing as an Archive would
-	// Datastores use this big global reference count system. Objects have an ID, which you can then
-	// use to increment and decrement their reference count.
-	// If we're the last one to use this object - which we almost certainly are - then delete it.
-
-	int datastoreRefCount = DecreaseRefCountById(refcountId);
-	if (datastoreRefCount != 0)
-		return;
-
-	using DtorFn = void (*)(void* thisPtr, bool freeMemory);
-	void* vtable = *(void***)datastore;
-	DtorFn dtor = *(DtorFn*)vtable;
-	dtor(datastore, true);
-}
-
 using ConversionFn = std::function<std::vector<uint8_t>(std::vector<uint8_t>&& origData, const std::string& name)>;
 
 static void ConvertData(Archive* archive, const ConversionFn& conversionFn)

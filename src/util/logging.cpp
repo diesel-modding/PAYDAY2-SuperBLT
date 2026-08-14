@@ -128,7 +128,7 @@ namespace raidhook
 
 				std::lock_guard<std::mutex> lock(GetLoggerMutex());
 				mOut.close();
-				mOut = std::ofstream(file.c_str(), std::ios::app);
+				mOut = std::ofstream(file.c_str());
 				mFilename = std::move(file);
 				mIsOpen = !!mOut;
 			}
