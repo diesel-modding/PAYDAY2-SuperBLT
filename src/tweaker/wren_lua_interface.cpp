@@ -8,7 +8,7 @@
 
 #include <map>
 #include <mutex>
-#include <string.h>
+#include <string>
 
 #include "wrenloader.h"
 

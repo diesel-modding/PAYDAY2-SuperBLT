@@ -3,6 +3,7 @@
 
 #include "lua.h"
 #include <exception>
+#include <memory>
 #include <platform.h>
 #include <sstream>
 #include <string>

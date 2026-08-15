@@ -3,9 +3,9 @@
 
 #include "util/util.h"
 #include <Windows.h>
-#include <stdio.h>
-#include <strsafe.h>
+#include <cstdio>
 #include <tchar.h>
+#include <strsafe.h>
 
 #include <fstream>
 #include <streambuf>
