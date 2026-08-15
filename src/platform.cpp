@@ -6,7 +6,7 @@
 #include "updater/updater.h"
 #include "util/util.h"
 
-#include <Windows.h>
+#include <windows.h>
 #include <filesystem>
 #include <format>
 #include <fstream>

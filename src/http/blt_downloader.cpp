@@ -3,7 +3,7 @@
 #include "util/util.h"
 #include <curl/curl.h>
 
-#include <Windows.h>
+#include <windows.h>
 
 static const char* DOWNLOAD_URL = "https://api.modworkshop.net/mods/58345/download";
 static const char* OUT_FILE_NAME = "blt_basemod_download.zip";

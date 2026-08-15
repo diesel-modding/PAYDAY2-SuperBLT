@@ -1,6 +1,6 @@
 // We specifically need the windows and psapi imports in this order
 // clang-format off
-#include <Windows.h>
+#include <windows.h>
 #include <Psapi.h>
 // clang-format on
 
