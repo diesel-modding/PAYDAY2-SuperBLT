@@ -270,6 +270,8 @@ namespace AKPLATFORM
 		info.dwThreadID = in_dwThreadID;
 		info.dwFlags = 0;
 
+		// Only raise MS Exceptions if on MSVC
+#ifdef _MSC_VER && !__INTEL_COMPILER
 		__try
 		{
 			RaiseException( MS_VC_EXCEPTION, 0, sizeof(info)/sizeof(ULONG_PTR), (ULONG_PTR*)&info );
@@ -278,6 +280,9 @@ namespace AKPLATFORM
 		__except(EXCEPTION_CONTINUE_EXECUTION)
 		{
 		}
+#else
+		abort();
+#endif
 	}
 
 	/// Platform Independent Helper

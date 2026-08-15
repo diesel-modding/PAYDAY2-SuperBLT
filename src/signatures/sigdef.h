@@ -9,7 +9,7 @@
 	SignatureSearch name##search(#name, &name, signature, mask, offset);
 
 #define CREATE_CALLABLE_CLASS_SIGNATURE(name, retn, signature, mask, offset, ...) \
-	typedef retn(__fastcall* name##ptr)(void*, __VA_ARGS__);                      \
+	typedef retn(__fastcall* name##ptr)(void* __VA_OPT__(,) __VA_ARGS__);                      \
 	name##ptr name = NULL;                                                        \
 	SignatureSearch name##search(#name, &name, signature, mask, offset);
 
@@ -21,7 +21,7 @@
 	extern name##ptr name;
 
 #define CREATE_CALLABLE_CLASS_SIGNATURE(name, retn, signature, mask, offset, ...) \
-	typedef retn(__fastcall* name##ptr)(void*, __VA_ARGS__);                      \
+	typedef retn(__fastcall* name##ptr)(void* __VA_OPT__(,) __VA_ARGS__);                      \
 	extern name##ptr name;
 
 #endif

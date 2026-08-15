@@ -52,6 +52,9 @@ list(TRANSFORM mxml_sources PREPEND lib/mxml/)
 add_library(mxml STATIC ${mxml_sources})
 target_include_directories(mxml PRIVATE lib/configs/mxml)
 target_compile_options(mxml PRIVATE -D_CRT_SECURE_NO_WARNINGS)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	target_compile_options(mxml PRIVATE -Wno-int-conversion -Wno-implicit-function-declaration)
+endif()
 target_include_directories(mxml PUBLIC lib/mxml)
 
 file(GLOB_RECURSE wren_sources
@@ -127,9 +130,18 @@ add_library(SuperBLT SHARED ${sources})
 target_compile_options(SuperBLT PRIVATE
 	-DCURL_STATICLIB
 	-DSUBHOOK_STATIC
+	-DAL_LIBTYPE_STATIC
 	-DWIN32_LEAN_AND_MEAN
 	-DNOMINMAX # Make std::min and std::max usable
 )
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	find_package(Threads REQUIRED)
+	set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+	target_compile_options(SuperBLT PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fpermissive>)
+	target_include_directories(SuperBLT PUBLIC lib/mldsa-native lib/sys/openalsoft/include)
+	target_link_libraries(SuperBLT -static -static-libgcc -static-libstdc++ Threads::Threads)
+endif()
 
 # General optimisation breaks calls to certain lua functions, so replace it.
 # We statically link to reduce dependencies
@@ -270,6 +282,9 @@ target_compile_definitions(psl PRIVATE
 )
 target_compile_definitions(psl PUBLIC PSL_STATIC)
 target_compile_options(psl PRIVATE -D_CRT_SECURE_NO_WARNINGS -DENABLE_BUILTIN)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	target_compile_options(psl PRIVATE -Wno-int-conversion -Wno-implicit-function-declaration)
+endif()
 target_include_directories(psl PUBLIC "${PSL_BINARY_DIR}")
 add_dependencies(psl generate_psl_files)
 
@@ -404,6 +419,5 @@ target_link_libraries(SuperBLT cJSON)
 add_library(mldsa_native STATIC
 	lib/mldsa-native/mldsa/mldsa_native.c
 )
-target_include_directories(mldsa_native PUBLIC lib/mldsa-native)
-
+target_include_directories(mldsa_native PUBLIC lib/mldsa-native lib/mldsa-native/mldsa)
 target_link_libraries(SuperBLT mldsa_native)

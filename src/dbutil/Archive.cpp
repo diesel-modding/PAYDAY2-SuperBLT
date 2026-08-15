@@ -15,9 +15,9 @@ Archive* Archive::Constructor(Archive* archive, const std::string& name, BLTAbst
 
 	archive->position = pos;
 	archive->length = len;
-	archive->probablyReadCounter = 0i64;
+	archive->probablyReadCounter = 0;
 	archive->probablyNotLoadedFlag = probablyNotLoadedFlag;
-	archive->maybeCompressedSize = 0i64;
+	archive->maybeCompressedSize = 0;
 
 #pragma warning(suppress : 6031) // Complains about not using the return data.
 	InitializeCriticalSectionAndSpinCount(&archive->lock, 4000);

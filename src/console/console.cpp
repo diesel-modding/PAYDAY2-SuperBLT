@@ -1,5 +1,6 @@
 #include "console.h"
-#include <FCNTL.H>
+// This is unix-only and so doesn't actually do anything anymore
+//#include <FCNTL.H>
 #include <conio.h>
 #include <io.h>
 #include <iostream>

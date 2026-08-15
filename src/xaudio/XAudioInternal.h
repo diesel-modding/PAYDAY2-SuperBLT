@@ -11,9 +11,9 @@
 #include "lua.h"
 #include "util/util.h"
 
-#include <al/al.h>
-#include <al/alc.h>
-#include <al/alext.h>
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alext.h>
 
 using namespace std;
 
