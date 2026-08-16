@@ -39,6 +39,7 @@ the specific language governing permissions and limitations under the License.
 #include <math.h>
 #endif // _WIN64
 #include <intrin.h>
+#include <processthreadsapi.h>
 
 #if defined(AK_XBOXSERIESX)
 #include <ammintrin.h>
@@ -270,7 +271,8 @@ namespace AKPLATFORM
 		info.dwThreadID = in_dwThreadID;
 		info.dwFlags = 0;
 
-		// Only raise MS Exceptions if on MSVC
+		// Only raise MS Exceptions if on MSVC.
+		// Might be better to use the current MS recommendation https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setthreaddescription
 #if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
 		__try
 		{
@@ -281,7 +283,21 @@ namespace AKPLATFORM
 		{
 		}
 #else
-		abort();
+		HANDLE hThread = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_SET_LIMITED_INFORMATION, false, in_dwThreadID);
+		PWSTR wideName;
+		{
+			int newLen = MultiByteToWideChar(CP_THREAD_ACP, 0, in_szThreadName, -1, nullptr, 0);
+			if (newLen <= 0)
+			{
+				// Something is up, not worth bothering.
+				goto cancel;
+			}
+			wideName = static_cast<PWSTR>(malloc((newLen + 1) * sizeof(WCHAR)));
+			MultiByteToWideChar(CP_THREAD_ACP, 0, in_szThreadName, -1, wideName, newLen + 1);
+		}
+		SetThreadDescription(hThread, wideName);
+		cancel:
+		CloseHandle(hThread);
 #endif
 	}
 
