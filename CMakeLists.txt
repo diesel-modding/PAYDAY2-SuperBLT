@@ -138,7 +138,6 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # Allows compiling with non-Micro
 	find_package(Threads REQUIRED)
 	set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 	target_compile_options(SuperBLT PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fpermissive>)
-	target_include_directories(SuperBLT PUBLIC lib/mldsa-native lib/sys/openalsoft/include)
 	target_link_libraries(SuperBLT -static -static-libgcc -static-libstdc++ Threads::Threads)
 endif()
 
@@ -419,5 +418,8 @@ target_link_libraries(SuperBLT cJSON)
 add_library(mldsa_native STATIC
 	lib/mldsa-native/mldsa/mldsa_native.c
 )
-target_include_directories(mldsa_native PUBLIC lib/mldsa-native/mldsa)
+target_include_directories(mldsa_native
+		PRIVATE lib/mldsa-native/mldsa
+		INTERFACE lib/mldsa-native
+)
 target_link_libraries(SuperBLT mldsa_native)
