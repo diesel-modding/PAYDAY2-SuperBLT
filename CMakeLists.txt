@@ -130,7 +130,6 @@ add_library(SuperBLT SHARED ${sources})
 target_compile_options(SuperBLT PRIVATE
 	-DCURL_STATICLIB
 	-DSUBHOOK_STATIC
-	-DAL_LIBTYPE_STATIC
 	-DWIN32_LEAN_AND_MEAN
 	-DNOMINMAX # Make std::min and std::max usable
 )
@@ -318,6 +317,7 @@ set(ALSOFT_INSTALL_HRTF_DATA OFF)
 set(ALSOFT_INSTALL_AMBDEC_PRESETS OFF)
 add_subdirectory(lib/sys/openalsoft EXCLUDE_FROM_ALL)
 target_link_libraries(OpenAL PRIVATE winmm.lib) # Not set up by default?
+target_compile_options(OpenAL PUBLIC -DAL_LIBTYPE_STATIC) # Required as well as LIBTYPE=STATIC to prevent OpenAL from generating a DllMain
 target_link_libraries(SuperBLT OpenAL)
 
 #### CURL ####
