@@ -52,7 +52,7 @@ list(TRANSFORM mxml_sources PREPEND lib/mxml/)
 add_library(mxml STATIC ${mxml_sources})
 target_include_directories(mxml PRIVATE lib/configs/mxml)
 target_compile_options(mxml PRIVATE -D_CRT_SECURE_NO_WARNINGS)
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # Allows compiling with non-Microsoft compilers. Not from the native Linux build.
 	target_compile_options(mxml PRIVATE -Wno-int-conversion -Wno-implicit-function-declaration)
 endif()
 target_include_directories(mxml PUBLIC lib/mxml)
@@ -134,7 +134,7 @@ target_compile_options(SuperBLT PRIVATE
 	-DNOMINMAX # Make std::min and std::max usable
 )
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # Allows compiling with non-Microsoft compilers. Not from the native Linux build.
 	find_package(Threads REQUIRED)
 	set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 	target_compile_options(SuperBLT PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fpermissive>)
