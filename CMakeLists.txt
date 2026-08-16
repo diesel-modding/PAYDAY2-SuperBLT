@@ -419,5 +419,5 @@ target_link_libraries(SuperBLT cJSON)
 add_library(mldsa_native STATIC
 	lib/mldsa-native/mldsa/mldsa_native.c
 )
-target_include_directories(mldsa_native PUBLIC lib/mldsa-native lib/mldsa-native/mldsa)
+target_include_directories(mldsa_native PUBLIC lib/mldsa-native/mldsa)
 target_link_libraries(SuperBLT mldsa_native)
