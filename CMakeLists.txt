@@ -139,6 +139,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # Allows compiling with non-Micro
 	set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 	target_compile_options(SuperBLT PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fpermissive>)
 	target_link_libraries(SuperBLT -static -static-libgcc -static-libstdc++ Threads::Threads)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+	target_compile_options(SuperBLT PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/Zc:preprocessor>)
 endif()
 
 # General optimisation breaks calls to certain lua functions, so replace it.
