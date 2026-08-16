@@ -32,10 +32,3 @@ set(ALSOFT_BACKEND_PIPEWIRE 0)
 # CMake determines how to examine dependencies based on the *host* system, leading to
 # a `file unknown error` unless the target platform is explicitly specified.
 set(CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM "windows+pe")
-
-# Qt4 tools
-SET(QT_QMAKE_EXECUTABLE ${HOST}-qmake)
-SET(QT_MOC_EXECUTABLE ${HOST}-moc)
-SET(QT_RCC_EXECUTABLE ${HOST}-rcc)
-SET(QT_UIC_EXECUTABLE ${HOST}-uic)
-SET(QT_LRELEASE_EXECUTABLE ${HOST}-lrelease)
