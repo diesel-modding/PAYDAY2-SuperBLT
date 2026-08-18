@@ -18,9 +18,18 @@ struct AnimationHeader // 32bit, 64bit has extra padding here on purpose
 	uint32_t file_size;
 };
 
+struct AnimationHeader64bit
+{
+	uint32_t type_id;
+	uint32_t version;
+	uint64_t original_location;
+	uint32_t file_size;
+	uint32_t padding[3];
+};
+
 std::vector<uint8_t> ConvertAnimation(std::vector<uint8_t>&& data, const std::string& path)
 {
-	if (data.size() < sizeof(AnimationHeader))
+	if (data.size() < sizeof(AnimationHeader64bit)) // no valid and empty animation will be smaller than this, unlike scriptdata
 		return data;
 
 	if (data[0] == 0x78)
@@ -41,8 +50,9 @@ std::vector<uint8_t> ConvertAnimation(std::vector<uint8_t>&& data, const std::st
 	}
 
 	AnimationHeader* header = (AnimationHeader*)data.data();
+	AnimationHeader64bit* header64bit = (AnimationHeader64bit*)data.data();
 
-	if ((size_t)header->file_size != data.size()) // size field doesn't align up to have the right data, must be 64bit
+	if ((size_t)header->file_size != data.size() && header64bit->file_size == data.size()) // size field doesn't align up to have the right data, must be 64bit
 	{
 		return data;
 	}
