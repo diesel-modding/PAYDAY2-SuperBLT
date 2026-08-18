@@ -42,7 +42,8 @@ std::vector<uint8_t> ConvertAnimation(std::vector<uint8_t>&& data, const std::st
 
 	AnimationHeader* header = (AnimationHeader*)data.data();
 
-	if ((size_t)header->file_size != data.size()) // size field doesn't align up to have the right data, must be 64bit
+	if (((size_t)header->file_size != data.size()) // size field doesn't align up to have the right data, must be 64bit
+	    && !(header->version == 0 && header->original_location == 0 && header->file_size == 0)) // HW12Dev: some REALLY old animations have all of these fields (except the type id) as zero, exported from really old animation tools?
 	{
 		return data;
 	}
