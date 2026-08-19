@@ -97,7 +97,9 @@ target_include_directories(lua51-shared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMA
 target_include_directories(LuaBuildVM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/luajit/src)
 target_include_directories(luajit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/luajit/src)
 
-target_compile_definitions(lua51-shared PUBLIC LUA_BUILD_AS_DLL)
+target_compile_definitions(lua51-shared PUBLIC LUA_BUILD_AS_DLL LUAJIT_DISABLE_JIT LUAJIT_ENABLE_GC64 LUAJIT_DISABLE_FFI)
+target_compile_definitions(lua51 PUBLIC LUAJIT_DISABLE_JIT LUAJIT_ENABLE_GC64 LUAJIT_DISABLE_FFI)
+target_compile_definitions(luajit PUBLIC LUAJIT_DISABLE_JIT LUAJIT_ENABLE_GC64 LUAJIT_DISABLE_FFI)
 
 set_property(TARGET lua51 PROPERTY
              MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
