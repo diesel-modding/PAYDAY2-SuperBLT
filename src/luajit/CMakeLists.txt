@@ -4,7 +4,6 @@ set(LUA51_SOURCES
     ../../lib/luajit/src/lib_aux.c
     ../../lib/luajit/src/lib_base.c
     ../../lib/luajit/src/lib_bit.c
-    ../../lib/luajit/src/lib_buffer.c
     ../../lib/luajit/src/lib_debug.c
     ../../lib/luajit/src/lib_ffi.c
     ../../lib/luajit/src/lib_init.c
@@ -18,7 +17,6 @@ set(LUA51_SOURCES
     ../../lib/luajit/src/lj_alloc.c
     ../../lib/luajit/src/lj_api.c
     ../../lib/luajit/src/lj_asm.c
-    ../../lib/luajit/src/lj_assert.c
     ../../lib/luajit/src/lj_bc.c
     ../../lib/luajit/src/lj_bcread.c
     ../../lib/luajit/src/lj_bcwrite.c
@@ -55,10 +53,8 @@ set(LUA51_SOURCES
     ../../lib/luajit/src/lj_opt_sink.c
     ../../lib/luajit/src/lj_opt_split.c
     ../../lib/luajit/src/lj_parse.c
-    ../../lib/luajit/src/lj_prng.c
     ../../lib/luajit/src/lj_profile.c
     ../../lib/luajit/src/lj_record.c
-    ../../lib/luajit/src/lj_serialize.c
     ../../lib/luajit/src/lj_snap.c
     ../../lib/luajit/src/lj_state.c
     ../../lib/luajit/src/lj_str.c
