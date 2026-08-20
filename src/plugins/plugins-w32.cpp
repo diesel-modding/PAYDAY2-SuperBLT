@@ -9,7 +9,7 @@ using namespace blt::plugins;
 typedef void* (*lua_access_func_t)(const char*);
 typedef void (*init_func_t)(lua_access_func_t get_lua_func_by_name);
 
-static void raid_log(const char* message, int level, const char* file, int line)
+static void pd2_log(const char* message, int level, const char* file, int line)
 {
 	using LT = raidhook::Logging::LogType;
 
@@ -41,9 +41,9 @@ static void* get_func(const char* name)
 {
 	string str = name;
 
-	if (str == "raid_log")
+	if (str == "pd2_log")
 	{
-		return &raid_log;
+		return &pd2_log;
 	}
 	else if (str == "is_active_state")
 	{
