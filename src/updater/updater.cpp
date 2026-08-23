@@ -234,6 +234,15 @@ static int DownloadUrlToString(const char* url, std::string& outVersion)
 		return 2;
 	}
 
+	long responseCode = 0;
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+
+	if (!(responseCode >= 200 && responseCode < 300))
+	{
+		curl_easy_cleanup(curl);
+		return 3;
+	}
+
 	outVersion = std::move(versionStream.str());
 	return 0;
 }
@@ -259,6 +268,13 @@ static std::optional<UpdateCheckInfo> ReadUpdateCheckInfo()
 	{
 		const char* lastCheck = mxmlElementGetAttr(root, "last-check");
 		const char* serverVersion = mxmlElementGetAttr(root, "server-version");
+
+		// backwards compatibility in case user has invalid xml
+		if (!strncmp(serverVersion, "error code:", 11))
+		{
+			std::remove(updatePath.c_str());
+			return std::nullopt;
+		}
 
 		result = UpdateCheckInfo{
 			.lastCheckTimestamp = std::stoll(lastCheck),
