@@ -269,13 +269,6 @@ static std::optional<UpdateCheckInfo> ReadUpdateCheckInfo()
 		const char* lastCheck = mxmlElementGetAttr(root, "last-check");
 		const char* serverVersion = mxmlElementGetAttr(root, "server-version");
 
-		// backwards compatibility in case user has invalid xml
-		if (!strncmp(serverVersion, "error code:", 11))
-		{
-			std::filesystem::remove(updatePath);
-			return std::nullopt;
-		}
-
 		result = UpdateCheckInfo{
 			.lastCheckTimestamp = std::stoll(lastCheck),
 			.serverVersion = serverVersion,
