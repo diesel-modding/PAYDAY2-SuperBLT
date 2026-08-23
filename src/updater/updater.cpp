@@ -272,7 +272,7 @@ static std::optional<UpdateCheckInfo> ReadUpdateCheckInfo()
 		// backwards compatibility in case user has invalid xml
 		if (!strncmp(serverVersion, "error code:", 11))
 		{
-			std::remove(updatePath.c_str());
+			std::filesystem::remove(updatePath);
 			return std::nullopt;
 		}
 
