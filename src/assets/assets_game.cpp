@@ -89,6 +89,7 @@ static void ConvertData(Archive* archive, const ConversionFn& conversionFn)
 	archive->maybeCompressedSize = 0;
 }
 
+const blt::idstring IDS_STREAM = blt::idstring_hash("stream");
 const blt::idstring IDS_BNK = blt::idstring_hash("bnk");
 const blt::idstring IDS_ANIMATION = blt::idstring_hash("animation");
 const blt::idstring IDS_FONT = blt::idstring_hash("font");
@@ -157,6 +158,16 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, Archive
 
 		// Don't attempt any further format conversion.
 		return;
+	}
+
+	if (*type == IDS_STREAM)
+	{
+		// Javgarag: We need this to selectively disable prefetching on overriden streams, otherwise pitch issues/crashes will happen
+		std::string filePath = archive->name.ToCXX();
+		size_t start = filePath.find_last_of("/") + 1;
+		size_t end = filePath.find(".stream", start);
+
+		blt::platform::wwise::RegisterOverridenStreamedWem(std::stoul(filePath.substr(start, end - start)));
 	}
 
 	if (*type == IDS_BNK)

@@ -68,6 +68,7 @@ namespace blt
 			void RegisterCustomSoundbank(const char* dbPath);
 			void UnregisterCustomSoundbank(const char* dbPath);
 
+			void RegisterOverridenStreamedWem(unsigned int wemId);
 			void RegisterCustomStreamedWemPath(unsigned int wemId, const char* dbPath);
 			void UnregisterCustomStreamedWemPath(unsigned int wemId);
 		};
