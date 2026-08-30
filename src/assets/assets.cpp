@@ -35,7 +35,7 @@ static subhook::Hook WwDevice_loadBankIdstringDetour;
 static subhook::Hook WwDevice_idToEntryDetour;
 
 static subhook::Hook CAkSrcFileBase_StartStreamDetour;
-std::unordered_set<uint32_t> overridenStreams, playedStreams;
+std::unordered_set<uint32_t> overridenStreams, playedPrefetchStreams;
 
 // Access happens on two different threads
 std::mutex customWwiseMapsMutex;
@@ -133,17 +133,20 @@ void* CAkSrcFileBase_StartStream_h(void* this_, void* in_bufSettings)
 	// disabling prefetch at least once, even for vanilla streams, is inevitable for our purposes
 	if (mediaInfo->bPrefetch) 
 	{
-		if (!playedStreams.contains(mediaInfo->sourceID) || overridenStreams.contains(mediaInfo->sourceID))
+		if (!playedPrefetchStreams.contains(mediaInfo->sourceID) || overridenStreams.contains(mediaInfo->sourceID))
 		{
 			mediaInfo->bPrefetch = false;
+
+			if (!playedPrefetchStreams.contains(mediaInfo->sourceID))
+				playedPrefetchStreams.insert(mediaInfo->sourceID);
 		}	
 	}
 
-	if (!playedStreams.contains(mediaInfo->sourceID))
-		playedStreams.insert(mediaInfo->sourceID);
-
 	auto ret = CAkSrcFileBase__StartStream(this_, in_bufSettings);
-	mediaInfo->bPrefetch = true;
+
+	if (!overridenStreams.contains(mediaInfo->sourceID) && playedPrefetchStreams.contains(mediaInfo->sourceID))
+		mediaInfo->bPrefetch = true;
+	
 	return ret;
 }
 
