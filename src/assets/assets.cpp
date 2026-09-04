@@ -34,6 +34,9 @@ DECLARE_PASSTHROUGH(try_open_property_match_resolver)
 static subhook::Hook WwDevice_loadBankIdstringDetour;
 static subhook::Hook WwDevice_idToEntryDetour;
 
+static subhook::Hook CAkSrcFileBase_StartStreamDetour;
+std::unordered_set<uint32_t> overridenStreams, playedPrefetchStreams;
+
 // Access happens on two different threads
 std::mutex customWwiseMapsMutex;
 std::map<blt::idstring, std::string> customWwiseSoundbankNames;
@@ -52,6 +55,21 @@ class sound_WwDevice
 	virtual SoundBank* load_bank_string(const char* bank, bool async) = 0;
 
   public:
+};
+
+struct AkMediaInformation
+{
+	uint32_t sourceID;
+	uint32_t uFileID;
+	uint32_t inMemoryMediaSize;
+
+	uint32_t bIsLanguageSpecific : 1;
+	uint32_t bPrefetch : 1;
+	uint32_t Type : 5;
+	uint32_t bHasSource : 1;
+	uint32_t bExternallySupplied : 1;
+	uint32_t bUseFilenameString : 1;
+	uint32_t bNonCachable : 1;
 };
 
 SoundBank* sound_WwDevice__load_bank_idstring_h(sound_WwDevice* this_, idstr bank, bool async)
@@ -94,7 +112,43 @@ idstr* sound_WwDevice__id_to_entry_h(sound_WwDevice* this_, idstr* result, unsig
 	return result;
 }
 
+void* CAkSrcFileBase_StartStream_h(void* this_, void* in_bufSettings)
+{
+	subhook::ScopedHookRemove scoped_remove(&CAkSrcFileBase_StartStreamDetour);
 
+	void* m_pCtx = *(void**)((char*)this_ + 24);
+	void* m_pSource = *(void**)((char*)m_pCtx + 672);
+
+	// struct AkSrcTypeInfo { // m_sSrcTypeInfo
+	//		AkMediaInformation mediaInfo;
+	//		...
+	// }
+	// struct CAkSource { // m_pSource
+	//		AkSrcTypeInfo m_sSrcTypeInfo
+	//		...
+	// }
+	AkMediaInformation* mediaInfo = (AkMediaInformation*)((char*)m_pSource);
+
+	// Javgarag: we need a playedStreams set so that we get a chance of adding the file to overridenStreams (it loads after this call) and so that we don't crash the first time for not disabling the prefetch
+	// disabling prefetch at least once, even for vanilla streams, is inevitable for our purposes
+	if (mediaInfo->bPrefetch) 
+	{
+		if (!playedPrefetchStreams.contains(mediaInfo->sourceID) || overridenStreams.contains(mediaInfo->sourceID))
+		{
+			mediaInfo->bPrefetch = false;
+
+			if (!playedPrefetchStreams.contains(mediaInfo->sourceID))
+				playedPrefetchStreams.insert(mediaInfo->sourceID);
+		}	
+	}
+
+	auto ret = CAkSrcFileBase__StartStream(this_, in_bufSettings);
+
+	if (!overridenStreams.contains(mediaInfo->sourceID) && playedPrefetchStreams.contains(mediaInfo->sourceID))
+		mediaInfo->bPrefetch = true;
+	
+	return ret;
+}
 
 void blt::win32::InitAssets()
 {
@@ -116,6 +170,8 @@ void blt::win32::InitAssets()
 	
 	WwDevice_loadBankIdstringDetour.Install(sound_WwDevice__load_bank_idstring, &sound_WwDevice__load_bank_idstring_h, HOOK_FLAG);
 	WwDevice_idToEntryDetour.Install(sound_WwDevice__id_to_entry, &sound_WwDevice__id_to_entry_h, HOOK_FLAG);
+
+	CAkSrcFileBase_StartStreamDetour.Install(CAkSrcFileBase__StartStream, &CAkSrcFileBase_StartStream_h, HOOK_FLAG);
 }
 
 
@@ -156,6 +212,14 @@ void blt::platform::wwise::UnregisterCustomSoundbank(const char* dbPath)
 		customWwiseSoundbankNames.erase(hashedPath);
 	if (customWwiseIdToEntryNames.find(wwiseHash) != customWwiseIdToEntryNames.end())
 		customWwiseIdToEntryNames.erase(wwiseHash);
+}
+
+void blt::platform::wwise::RegisterOverridenStreamedWem(unsigned int wemId)
+{
+	if (overridenStreams.contains(wemId))
+		return;
+
+	overridenStreams.insert(wemId);
 }
 
 void blt::platform::wwise::RegisterCustomStreamedWemPath(unsigned int wemId, const char* dbPath)
