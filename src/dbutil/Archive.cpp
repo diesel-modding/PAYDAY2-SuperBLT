@@ -10,8 +10,7 @@
 Archive* Archive::Constructor(Archive* archive, const std::string& name, BLTAbstractDataStore* datastore, int64_t pos,
                               int64_t len, bool probablyNotLoadedFlag)
 {
-
-	memset(&archive->name, 0, sizeof(Archive::name));
+	archive->name.clear();
 
 	archive->position = pos;
 	archive->length = len;
