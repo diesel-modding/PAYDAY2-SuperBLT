@@ -58,5 +58,8 @@ namespace blt
 		// Implemented per-platform, creates the correct plugin object
 		// This should NOT be used outside LoadPlugin()
 		Plugin* CreateNativePlugin(std::string);
+
+		// Auto-generated implementation, for use inside the plugin handling code only.
+		void* GetLuaFnByNameGenerated(const std::string& name);
 	} // namespace plugins
 } // namespace blt

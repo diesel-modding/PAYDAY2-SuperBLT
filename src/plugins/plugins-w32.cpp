@@ -42,23 +42,11 @@ static void* get_func(const char* name)
 	string str = name;
 
 	if (str == "pd2_log")
-	{
 		return &pd2_log;
-	}
-	else if (str == "is_active_state")
-	{
+	if (str == "is_active_state")
 		return &is_active_state;
-	}
-	else if (str == "luaL_checkstack")
-	{
-		return &luaL_checkstack;
-	}
-	else if (str == "lua_rawequal")
-	{
-		return &lua_rawequal;
-	}
 
-	return blt::platform::win32::get_lua_func(name);
+	return GetLuaFnByNameGenerated(name);
 }
 
 class WindowsPlugin : public Plugin

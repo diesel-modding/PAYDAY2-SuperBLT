@@ -97,19 +97,6 @@ void blt::platform::win32::OpenConsole()
 	}
 }
 
-void* blt::platform::win32::get_lua_func(const char* name)
-{
-	// Only allow getting the Lua functions
-	if (strncmp(name, "lua", 3))
-		return NULL;
-
-	// Don't allow getting the setup functions
-	if (!strncmp(name, "luaL_newstate", 13))
-		return NULL;
-
-	return SignatureSearch::GetFunctionByName(name);
-}
-
 subhook::Hook luaCallDetour;
 
 bool blt::platform::lua::GetForcePCalls()

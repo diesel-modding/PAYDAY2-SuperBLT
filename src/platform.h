@@ -57,7 +57,6 @@ namespace blt
 		namespace win32
 		{
 			void OpenConsole();
-			void* get_lua_func(const char* name);
 		}; // namespace win32
 
 

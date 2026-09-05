@@ -176,6 +176,21 @@ add_custom_target(generate_version_header
 target_sources(SuperBLT PRIVATE "${gen_version_header}")
 target_include_directories(SuperBLT PRIVATE "${gen_version_dir}")
 
+# Generate the SDK-related files
+set(PLUGIN_SDK_EXPORT_C "${CMAKE_CURRENT_BINARY_DIR}/plugin_sdk_export.gen.cpp") # For use in SBLT
+set(PLUGIN_SDK_IMPORT_C "${CMAKE_CURRENT_BINARY_DIR}/plugin_sdk_import.gen.cpp") # For use in the plugin SDK (copy-paste over)
+add_custom_command(
+	OUTPUT "${PLUGIN_SDK_EXPORT_C}"
+	COMMAND
+		${Python3_EXECUTABLE} src/plugins/gen_lua_bindings.py
+		--plugin-impl-c "${PLUGIN_SDK_IMPORT_C}"
+		--export-impl-c "${PLUGIN_SDK_EXPORT_C}"
+	MAIN_DEPENDENCY src/plugins/gen_lua_bindings.py
+	DEPENDS lib/luajit/src/lua.h lib/luajit/src/lauxlib.h
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_sources(SuperBLT PRIVATE "${PLUGIN_SDK_EXPORT_C}")
+
 ###############################################################################
 ## dependencies ###############################################################
 ###############################################################################

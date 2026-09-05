@@ -1,0 +1,2047 @@
+{
+    "functions": [
+        {
+            "args": [
+                {
+                    "name": "f",
+                    "type": "lua_Alloc"
+                },
+                {
+                    "name": "ud",
+                    "type": "void*"
+                }
+            ],
+            "name": "lua_newstate",
+            "ret": "lua_State*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_close",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_newthread",
+            "ret": "lua_State*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "panicf",
+                    "type": "lua_CFunction"
+                }
+            ],
+            "name": "lua_atpanic",
+            "ret": "lua_CFunction"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_gettop",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_settop",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_pushvalue",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_remove",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_insert",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_replace",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "sz",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_checkstack",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "from",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "to",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "n",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_xmove",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_isnumber",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_isstring",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_iscfunction",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_isuserdata",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_type",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "tp",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_typename",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx1",
+                    "type": "int"
+                },
+                {
+                    "name": "idx2",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_equal",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx1",
+                    "type": "int"
+                },
+                {
+                    "name": "idx2",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_rawequal",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx1",
+                    "type": "int"
+                },
+                {
+                    "name": "idx2",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_lessthan",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_tonumber",
+            "ret": "lua_Number"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_tointeger",
+            "ret": "lua_Integer"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_toboolean",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                },
+                {
+                    "name": "len",
+                    "type": "size_t*"
+                }
+            ],
+            "name": "lua_tolstring",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_objlen",
+            "ret": "size_t"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_tocfunction",
+            "ret": "lua_CFunction"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_touserdata",
+            "ret": "void*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_tothread",
+            "ret": "lua_State*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_topointer",
+            "ret": "const void*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_pushnil",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "n",
+                    "type": "lua_Number"
+                }
+            ],
+            "name": "lua_pushnumber",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "n",
+                    "type": "lua_Integer"
+                }
+            ],
+            "name": "lua_pushinteger",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "s",
+                    "type": "const char*"
+                },
+                {
+                    "name": "l",
+                    "type": "size_t"
+                }
+            ],
+            "name": "lua_pushlstring",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "s",
+                    "type": "const char*"
+                }
+            ],
+            "name": "lua_pushstring",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "fmt",
+                    "type": "const char*"
+                },
+                {
+                    "name": "argp",
+                    "type": "va_list"
+                }
+            ],
+            "name": "lua_pushvfstring",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "fmt",
+                    "type": "const char*"
+                }
+            ],
+            "name": "lua_pushfstring",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "fn",
+                    "type": "lua_CFunction"
+                },
+                {
+                    "name": "n",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_pushcclosure",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "b",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_pushboolean",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "p",
+                    "type": "void*"
+                }
+            ],
+            "name": "lua_pushlightuserdata",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_pushthread",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_gettable",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                },
+                {
+                    "name": "k",
+                    "type": "const char*"
+                }
+            ],
+            "name": "lua_getfield",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_rawget",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                },
+                {
+                    "name": "n",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_rawgeti",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "narr",
+                    "type": "int"
+                },
+                {
+                    "name": "nrec",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_createtable",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "sz",
+                    "type": "size_t"
+                }
+            ],
+            "name": "lua_newuserdata",
+            "ret": "void*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "objindex",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_getmetatable",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_getfenv",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_settable",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                },
+                {
+                    "name": "k",
+                    "type": "const char*"
+                }
+            ],
+            "name": "lua_setfield",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_rawset",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                },
+                {
+                    "name": "n",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_rawseti",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "objindex",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_setmetatable",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_setfenv",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "nargs",
+                    "type": "int"
+                },
+                {
+                    "name": "nresults",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_call",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "nargs",
+                    "type": "int"
+                },
+                {
+                    "name": "nresults",
+                    "type": "int"
+                },
+                {
+                    "name": "errfunc",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_pcall",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "func",
+                    "type": "lua_CFunction"
+                },
+                {
+                    "name": "ud",
+                    "type": "void*"
+                }
+            ],
+            "name": "lua_cpcall",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "reader",
+                    "type": "lua_Reader"
+                },
+                {
+                    "name": "dt",
+                    "type": "void*"
+                },
+                {
+                    "name": "chunkname",
+                    "type": "const char*"
+                }
+            ],
+            "name": "lua_load",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "writer",
+                    "type": "lua_Writer"
+                },
+                {
+                    "name": "data",
+                    "type": "void*"
+                }
+            ],
+            "name": "lua_dump",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "nresults",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_yield",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "narg",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_resume",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_status",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "what",
+                    "type": "int"
+                },
+                {
+                    "name": "data",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_gc",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_error",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_next",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "n",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_concat",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "ud",
+                    "type": "void**"
+                }
+            ],
+            "name": "lua_getallocf",
+            "ret": "lua_Alloc"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "f",
+                    "type": "lua_Alloc"
+                },
+                {
+                    "name": "ud",
+                    "type": "void*"
+                }
+            ],
+            "name": "lua_setallocf",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "from",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "to",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_setlevel",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "level",
+                    "type": "int"
+                },
+                {
+                    "name": "ar",
+                    "type": "lua_Debug*"
+                }
+            ],
+            "name": "lua_getstack",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "what",
+                    "type": "const char*"
+                },
+                {
+                    "name": "ar",
+                    "type": "lua_Debug*"
+                }
+            ],
+            "name": "lua_getinfo",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "ar",
+                    "type": "const lua_Debug*"
+                },
+                {
+                    "name": "n",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_getlocal",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "ar",
+                    "type": "const lua_Debug*"
+                },
+                {
+                    "name": "n",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_setlocal",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "funcindex",
+                    "type": "int"
+                },
+                {
+                    "name": "n",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_getupvalue",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "funcindex",
+                    "type": "int"
+                },
+                {
+                    "name": "n",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_setupvalue",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "func",
+                    "type": "lua_Hook"
+                },
+                {
+                    "name": "mask",
+                    "type": "int"
+                },
+                {
+                    "name": "count",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_sethook",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_gethook",
+            "ret": "lua_Hook"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_gethookmask",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_gethookcount",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                },
+                {
+                    "name": "n",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_upvalueid",
+            "ret": "void*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx1",
+                    "type": "int"
+                },
+                {
+                    "name": "n1",
+                    "type": "int"
+                },
+                {
+                    "name": "idx2",
+                    "type": "int"
+                },
+                {
+                    "name": "n2",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_upvaluejoin",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "reader",
+                    "type": "lua_Reader"
+                },
+                {
+                    "name": "dt",
+                    "type": "void*"
+                },
+                {
+                    "name": "chunkname",
+                    "type": "const char*"
+                },
+                {
+                    "name": "mode",
+                    "type": "const char*"
+                }
+            ],
+            "name": "lua_loadx",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_version",
+            "ret": "const lua_Number*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "fromidx",
+                    "type": "int"
+                },
+                {
+                    "name": "toidx",
+                    "type": "int"
+                }
+            ],
+            "name": "lua_copy",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                },
+                {
+                    "name": "isnum",
+                    "type": "int*"
+                }
+            ],
+            "name": "lua_tonumberx",
+            "ret": "lua_Number"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                },
+                {
+                    "name": "isnum",
+                    "type": "int*"
+                }
+            ],
+            "name": "lua_tointegerx",
+            "ret": "lua_Integer"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                }
+            ],
+            "name": "lua_isyieldable",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "libname",
+                    "type": "const char*"
+                },
+                {
+                    "name": "l",
+                    "type": "const luaL_Reg*"
+                },
+                {
+                    "name": "nup",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_openlib",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "libname",
+                    "type": "const char*"
+                },
+                {
+                    "name": "l",
+                    "type": "const luaL_Reg*"
+                }
+            ],
+            "name": "luaL_register",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "obj",
+                    "type": "int"
+                },
+                {
+                    "name": "e",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_getmetafield",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "obj",
+                    "type": "int"
+                },
+                {
+                    "name": "e",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_callmeta",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "narg",
+                    "type": "int"
+                },
+                {
+                    "name": "tname",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_typerror",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "numarg",
+                    "type": "int"
+                },
+                {
+                    "name": "extramsg",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_argerror",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "numArg",
+                    "type": "int"
+                },
+                {
+                    "name": "l",
+                    "type": "size_t*"
+                }
+            ],
+            "name": "luaL_checklstring",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "numArg",
+                    "type": "int"
+                },
+                {
+                    "name": "def",
+                    "type": "const char*"
+                },
+                {
+                    "name": "l",
+                    "type": "size_t*"
+                }
+            ],
+            "name": "luaL_optlstring",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "numArg",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_checknumber",
+            "ret": "lua_Number"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "nArg",
+                    "type": "int"
+                },
+                {
+                    "name": "def",
+                    "type": "lua_Number"
+                }
+            ],
+            "name": "luaL_optnumber",
+            "ret": "lua_Number"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "numArg",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_checkinteger",
+            "ret": "lua_Integer"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "nArg",
+                    "type": "int"
+                },
+                {
+                    "name": "def",
+                    "type": "lua_Integer"
+                }
+            ],
+            "name": "luaL_optinteger",
+            "ret": "lua_Integer"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "sz",
+                    "type": "int"
+                },
+                {
+                    "name": "msg",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_checkstack",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "narg",
+                    "type": "int"
+                },
+                {
+                    "name": "t",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_checktype",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "narg",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_checkany",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "tname",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_newmetatable",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "ud",
+                    "type": "int"
+                },
+                {
+                    "name": "tname",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_checkudata",
+            "ret": "void*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "lvl",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_where",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "fmt",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_error",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "t",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_ref",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "t",
+                    "type": "int"
+                },
+                {
+                    "name": "ref",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_unref",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "filename",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_loadfile",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "buff",
+                    "type": "const char*"
+                },
+                {
+                    "name": "sz",
+                    "type": "size_t"
+                },
+                {
+                    "name": "name",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_loadbuffer",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "s",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_loadstring",
+            "ret": "int"
+        },
+        {
+            "args": [],
+            "name": "luaL_newstate",
+            "ret": "lua_State*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "s",
+                    "type": "const char*"
+                },
+                {
+                    "name": "p",
+                    "type": "const char*"
+                },
+                {
+                    "name": "r",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_gsub",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "idx",
+                    "type": "int"
+                },
+                {
+                    "name": "fname",
+                    "type": "const char*"
+                },
+                {
+                    "name": "szhint",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_findtable",
+            "ret": "const char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "stat",
+                    "type": "int"
+                },
+                {
+                    "name": "fname",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_fileresult",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "stat",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_execresult",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "filename",
+                    "type": "const char*"
+                },
+                {
+                    "name": "mode",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_loadfilex",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "buff",
+                    "type": "const char*"
+                },
+                {
+                    "name": "sz",
+                    "type": "size_t"
+                },
+                {
+                    "name": "name",
+                    "type": "const char*"
+                },
+                {
+                    "name": "mode",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_loadbufferx",
+            "ret": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "L1",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "msg",
+                    "type": "const char*"
+                },
+                {
+                    "name": "level",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_traceback",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "l",
+                    "type": "const luaL_Reg*"
+                },
+                {
+                    "name": "nup",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_setfuncs",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "modname",
+                    "type": "const char*"
+                },
+                {
+                    "name": "sizehint",
+                    "type": "int"
+                }
+            ],
+            "name": "luaL_pushmodule",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "ud",
+                    "type": "int"
+                },
+                {
+                    "name": "tname",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_testudata",
+            "ret": "void*"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "tname",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_setmetatable",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "L",
+                    "type": "lua_State*"
+                },
+                {
+                    "name": "B",
+                    "type": "luaL_Buffer*"
+                }
+            ],
+            "name": "luaL_buffinit",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "B",
+                    "type": "luaL_Buffer*"
+                }
+            ],
+            "name": "luaL_prepbuffer",
+            "ret": "char*"
+        },
+        {
+            "args": [
+                {
+                    "name": "B",
+                    "type": "luaL_Buffer*"
+                },
+                {
+                    "name": "s",
+                    "type": "const char*"
+                },
+                {
+                    "name": "l",
+                    "type": "size_t"
+                }
+            ],
+            "name": "luaL_addlstring",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "B",
+                    "type": "luaL_Buffer*"
+                },
+                {
+                    "name": "s",
+                    "type": "const char*"
+                }
+            ],
+            "name": "luaL_addstring",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "B",
+                    "type": "luaL_Buffer*"
+                }
+            ],
+            "name": "luaL_addvalue",
+            "ret": "void"
+        },
+        {
+            "args": [
+                {
+                    "name": "B",
+                    "type": "luaL_Buffer*"
+                }
+            ],
+            "name": "luaL_pushresult",
+            "ret": "void"
+        }
+    ]
+}
