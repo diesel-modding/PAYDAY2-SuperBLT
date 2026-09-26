@@ -32,7 +32,7 @@ namespace raidhook
 				localtime_r(&currentTime, &now);
 
 				char datestring[100];
-				std::strftime(datestring, sizeof(datestring), "%I:%M:%S %p", &now);
+				std::strftime(datestring, sizeof(datestring), "%H:%M:%S", &now);
 
 				os << datestring << ' ';
 				return os;
@@ -199,11 +199,11 @@ namespace raidhook
 		{
 			if (line && line > 0)
 			{
-				*this << LogTime << msgType << "(" << std::filesystem::path(file).filename().string() << ':' << line << ") ";
+				*this << LogTime << msgType << "(" << std::filesystem::path(file).filename() << ':' << line << ") ";
 			}
 			else if (file)
 			{
-				*this << LogTime << msgType << "(" << std::filesystem::path(file).filename().string() << ") ";
+				*this << LogTime << msgType << "(" << std::filesystem::path(file).filename() << ") ";
 			}
 			else
 			{
