@@ -199,11 +199,11 @@ namespace raidhook
 		{
 			if (line && line > 0)
 			{
-				*this << LogTime << msgType << "(" << std::filesystem::path(file).filename() << ':' << line << ") ";
+				*this << LogTime << msgType << "(" << std::filesystem::path(file).filename().string() << ':' << line << ") ";
 			}
 			else if (file)
 			{
-				*this << LogTime << msgType << "(" << std::filesystem::path(file).filename() << ") ";
+				*this << LogTime << msgType << "(" << std::filesystem::path(file).filename().string() << ") ";
 			}
 			else
 			{
