@@ -15,7 +15,7 @@ CREATE_CALLABLE_CLASS_SIGNATURE(ScriptSerializer__from_binary, void*, "\x48\x89\
 class sound_WwDevice;
 class SoundBank;
 class idstr {public: unsigned __int64 _id;};
-CREATE_CALLABLE_CLASS_SIGNATURE(sound_WwDevice__load_bank_idstring, SoundBank*, "\x48\x89\x5C\x24\x00\x48\x89\x74\x24\x00\x48\x89\x7C\x24\x00\x4C\x89\x74\x24\x00\x41\x57\x48\x83\xEC\x00\x45\x0F\xB6\xF8", "xxxx?xxxx?xxxx?xxxx?xxxxx?xxxx", 0, idstr bank, bool async);
+CREATE_CALLABLE_CLASS_SIGNATURE(sound_WwDevice__load_bank_idstring, SoundBank*, "\x48\x89\x5C\x24\x00\x48\x89\x74\x24\x00\x48\x89\x7C\x24\x00\x4C\x89\x74\x24\x00\x41\x57\x48\x83\xEC\x00\x45\x0F\xB6\xF8", "xxxx?xxxx?xxxx?xxxx?xxxxx?xxxx", 0, idstr* bank, bool async);
 CREATE_CALLABLE_CLASS_SIGNATURE(sound_WwDevice__id_to_entry, idstr*, "\x48\x89\x5C\x24\x00\x48\x89\x74\x24\x00\x48\x89\x7C\x24\x00\x48\x8B\xB1", "xxxx?xxxx?xxxx?xxx", 0, idstr* result, unsigned int wwise_id);
 
 CREATE_CALLABLE_CLASS_SIGNATURE(CAkSrcFileBase__CreateStream, int, "\x48\x89\x74\x24\x10\x48\x89\x7C\x24\x18\x55\x48\x8B\xEC\x48\x81\xEC\x80\x00\x00\x00\x4C\x8B\x49", "xxxxxxxxxxxxxxxxxxxxxxx", 0, void* in_bufSettings, char in_uMinNumBuffers);

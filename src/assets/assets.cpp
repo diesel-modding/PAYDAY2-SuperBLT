@@ -72,7 +72,7 @@ struct AkMediaInformation
 	uint32_t bNonCachable : 1;
 };
 
-SoundBank* sound_WwDevice__load_bank_idstring_h(sound_WwDevice* this_, idstr bank, bool async)
+SoundBank* sound_WwDevice__load_bank_idstring_h(sound_WwDevice* this_, idstr* bank, bool async)
 {
 	subhook::ScopedHookRemove scoped_remove(&WwDevice_loadBankIdstringDetour);
 
@@ -81,9 +81,10 @@ SoundBank* sound_WwDevice__load_bank_idstring_h(sound_WwDevice* this_, idstr ban
 	if (soundbank == nullptr)
 	{
 		std::lock_guard customListLock(customWwiseMapsMutex);
-		if (customWwiseSoundbankNames.find(bank._id) != customWwiseSoundbankNames.end())
+
+		if (customWwiseSoundbankNames.find(bank->_id) != customWwiseSoundbankNames.end())
 		{
-			soundbank = this_->load_bank_string(customWwiseSoundbankNames[bank._id].c_str(), async);
+			soundbank = this_->load_bank_string(customWwiseSoundbankNames[bank->_id].c_str(), async);
 		}
 	}
 
@@ -101,8 +102,6 @@ idstr* sound_WwDevice__id_to_entry_h(sound_WwDevice* this_, idstr* result, unsig
 	{
 		return result;
 	}
-
-	std::lock_guard customListLock(customWwiseMapsMutex);
 
 	if (customWwiseIdToEntryNames.find(wwise_id) != customWwiseIdToEntryNames.end())
 	{
