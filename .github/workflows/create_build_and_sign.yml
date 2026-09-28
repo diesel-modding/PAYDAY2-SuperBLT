@@ -72,6 +72,9 @@ jobs:
       uses: azure/artifact-signing-action@v2
       with:
         endpoint: https://weu.codesigning.azure.net/
+        signing-account-name: stg-code-signing
+        certificate-profile-name: stg-diesel
+
         files: ${{ github.workspace }}\build\RelWithDebInfo\WSOCK32.dll
         file-digest: SHA256
         timestamp-rfc3161: http://timestamp.acs.microsoft.com
