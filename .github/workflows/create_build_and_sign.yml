@@ -67,7 +67,7 @@ jobs:
 
     # Step 7: Sign artifacts
     - name: Sign artifacts
-      uses: azure/artiface-signing-action@v2
+      uses: azure/artifact-signing-action@v2
       with:
         endpoint: https://weu.codesigning.azure.net/
         files: ${{ github.workspace }}\build\RelWithDebInfo\WSOCK32.dll
