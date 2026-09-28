@@ -1,12 +1,6 @@
 name: Create SBLT Build
 
 on:
-  push:
-    paths:
-      - src/**
-      - lib/**
-      - wren/**
-      - .github/workflows/**
   pull_request:
     paths:
       - src/**

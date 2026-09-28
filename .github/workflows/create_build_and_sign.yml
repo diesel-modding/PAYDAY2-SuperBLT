@@ -1,0 +1,96 @@
+name: Create and Sign SBLT Build
+
+on:
+  push:
+    paths:
+      - src/**
+      - lib/**
+      - wren/**
+      - .github/workflows/**
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  BUILD_TYPE: RelWithDebInfo
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+      with:
+        submodules: true
+        fetch-depth: 0 # Fetch all the tags, so git_version.py works properly
+
+    - name: Install Python3 and CMake
+      run: |
+        choco install -y python3
+        choco install -y cmake
+      shell: powershell
+
+    - name: Set environment paths
+      run: |
+         $env:Path += ';C:\Program Files\CMake\bin'
+      shell: powershell
+
+    - name: Initialize and update Git submodules
+      run: |
+        git submodule init
+        git submodule update
+      shell: bash
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v3
+
+      # Step 5: Build the project
+    - name: Build with CMake and MSBuild
+      run: |
+        mkdir build
+        cd build
+        cmake .. -A x64 -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=RelWithDebInfo
+        msbuild SuperBLT.sln /t:Build /p:Configuration=RelWithDebInfo
+      shell: powershell
+
+    # Step 6: Login to azure
+    - name: Azure login
+      uses: azure/login@v1
+      with:
+        # Codesigning is not to be misused, or credentials will be revoked.
+        # Whitelisted for this repository only, be careful what you allow to run with secrets access in the context of this repo
+        client-id: ${{ secrets.CODESIGN_AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.CODESIGN_AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.CODESIGN_AZURE_SUBSCRIPTION_ID }}
+
+    # Step 7: Sign artifacts
+    - name: Sign artifacts
+      uses: azure/artiface-signing-action@v2
+      with:
+        endpoint: https://weu.codesigning.azure.net/
+        files: ${{ github.workspace }}\build\RelWithDebInfo\WSOCK32.dll
+        file-digest: SHA256
+        timestamp-rfc3161: http://timestamp.acs.microsoft.com
+        timestamp-digest: SHA256
+
+        exclude-environment-credential: true
+        exclude-workload-identity-credential: true
+        exclude-managed-identity-credential: true
+        exclude-shared-token-cache-credential: true
+        exclude-visual-studio-credential: true
+        exclude-visual-studio-code-credential: true
+        exclude-azure-cli-credential: false
+        exclude-azure-powershell-credential: true
+        exclude-azure-developer-cli-credential: true
+        exclude-interactive-browser-credential: true
+
+      # Step 8: Upload build artifacts
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: Build Artifacts
+        path: |
+          build/RelWithDebInfo/WSOCK32.dll
+          build/RelWithDebInfo/WSOCK32.pdb
