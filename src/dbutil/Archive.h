@@ -20,6 +20,13 @@ class PDString
 	{
 	}
 
+	void clear()
+	{
+		_Mysize = 0;
+		_Myres = 0;
+		storage.data = nullptr;
+	}
+
 	const char* cstr() const
 	{
 		return data();
