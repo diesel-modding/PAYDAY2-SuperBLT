@@ -10,6 +10,14 @@
 
 struct MassunitHeader
 {
+	uint32_t types_size;
+	uint32_t types_capacity;
+	uint32_t types_data;
+	uint32_t types_allocator;
+};
+
+struct MassunitHeader64bit
+{
 	uint64_t types_size;
 	uint64_t types_capacity;
 	uint64_t types_data;
@@ -18,10 +26,11 @@ struct MassunitHeader
 
 std::vector<uint8_t> ConvertMassunit(std::vector<uint8_t>&& data, const std::string& path)
 {
+	// Empty massunits that were created by the old DieselEngineFormats can be smaller than 64 bit header
 	if (data.size() < sizeof(MassunitHeader))
 		return data;
 
-	MassunitHeader* header = (MassunitHeader*)data.data();
+	MassunitHeader64bit* header = (MassunitHeader64bit*)data.data();
 
 	if (header->types_allocator == 0)
 	{
