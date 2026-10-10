@@ -112,7 +112,7 @@ void blt::platform::lua::SetForcePCalls(bool state)
 
 	if (state)
 	{
-		luaCallDetour.Install(lua_call_exe, blt::lua_functions::perform_lua_pcall);
+		luaCallDetour.Install(lua_call_exe, blt::lua_functions::perform_lua_pcall, subhook::HookFlag64BitOffset);
 		RAIDHOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
 	}
 	else
