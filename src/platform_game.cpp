@@ -7,7 +7,7 @@
 #include <util/util.h>
 
 static std::thread::id main_thread_id;
-static subhook::Hook applicationUpdateDetour, newStateDetour, luaCloseDetour, node_from_xmlDetour;
+static subhook::Hook applicationUpdateDetour, newStateDetour, luaCallDetour, luaCloseDetour, node_from_xmlDetour;
 
 static void init_idstring_pointers()
 {
@@ -58,6 +58,21 @@ static void lua_close_new(lua_State* L)
 
 	blt::lua_functions::close(L);
 	lua_close_exe(L);
+}
+
+static void lua_call_new(lua_State* L, int args, int returns)
+{
+	subhook::ScopedHookRemove scoped_remove(&luaCallDetour);
+
+	lua_getglobal(L, "debug");
+	if (lua_isnil(L, -1))
+	{
+		// Debug isn't available, use normal call
+		lua_remove(L, -1);
+		return lua_call_exe(L, args, returns);
+	}
+
+	return blt::lua_functions::perform_lua_pcall(L, args, returns);
 }
 
 static void node_from_xml_new(void* node, char* data, int* len)

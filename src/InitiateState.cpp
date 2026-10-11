@@ -827,13 +827,7 @@ namespace blt
 		void perform_lua_pcall(lua_State* L, int args, int returns)
 		{
 			// https://stackoverflow.com/questions/30021904/lua-set-default-error-handler/30022216#30022216
-			lua_getglobal(L, "debug");
-			if (lua_isnil(L, -1))
-			{
-				// Debug isn't available, use normal call
-				lua_remove(L, -1);
-				return lua_call_exe(L, args, returns);
-			}
+
 			lua_getfield(L, -1, "traceback");
 			lua_remove(L, -2);
 			// Do not index from the top (i.e. use a negative index) as this has the potential to mess up if the callee

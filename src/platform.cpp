@@ -97,8 +97,6 @@ void blt::platform::win32::OpenConsole()
 	}
 }
 
-subhook::Hook luaCallDetour;
-
 bool blt::platform::lua::GetForcePCalls()
 {
 	return luaCallDetour.IsInstalled();
@@ -112,7 +110,7 @@ void blt::platform::lua::SetForcePCalls(bool state)
 
 	if (state)
 	{
-		luaCallDetour.Install(lua_call_exe, blt::lua_functions::perform_lua_pcall, subhook::HookFlag64BitOffset);
+		luaCallDetour.Install(lua_call_exe, lua_call_new, subhook::HookFlag64BitOffset);
 		RAIDHOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
 	}
 	else
