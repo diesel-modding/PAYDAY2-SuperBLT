@@ -36,6 +36,16 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		if (!exeFilename.ends_with("PAYDAY2.exe"))
 			return TRUE;
 
+		std::wstring cmd_line = GetCommandLineW();
+		auto payday2_start = cmd_line.find(L"PAYDAY2.exe");
+
+		// "--safemode" or "-sm" is also an engine-sided launch argument that ignores loading mod_overrides to prevent crashes
+		if (cmd_line.find(L"--safemode", payday2_start) != std::wstring::npos ||
+		    cmd_line.find(L"-sm", payday2_start) != std::wstring::npos)
+		{
+			return TRUE;
+		}
+
 		// Make sure there aren't two copies of SBLT installed
 		if (Util::GetFileType("WSOCK32.dll") == Util::FileType_File &&
 		    Util::GetFileType("IPHLPAPI.dll") == Util::FileType_File)
