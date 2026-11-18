@@ -32,6 +32,6 @@ CREATE_CALLABLE_CLASS_SIGNATURE(dsl__DB__DB, void, "\x48\x89\x5C\x24\x00\x48\x89
 CREATE_CALLABLE_CLASS_SIGNATURE(dsl__SortMap__DBKey__upper_bound, void*, "\x40\x57\x44\x8B\x41", "xxxxx", 0, void* k);
 CREATE_CALLABLE_CLASS_SIGNATURE(dsl__SortMap__DBKey__lower_bound, void*, "\x48\x89\x5C\x24\x00\x57\x44\x8B\x41", "xxxx?xxxx", 0, void* k);
 
-CREATE_CALLABLE_CLASS_SIGNATURE(dsl__Archive__checked_read_raw, void, "\x48\x89\x5C\x24\x00\x48\x89\x6C\x24\x00\x48\x89\x74\x24\x00\x48\x89\x7C\x24\x00\x41\x56\x48\x81\xEC\x00\x00\x00\x00\x4D\x8B\xF0", "xxxx?xxxx?xxxx?xxxx?xxxxx????xxx", 0, char* out, unsigned long long len);
+CREATE_CALLABLE_CLASS_SIGNATURE(dsl__Archive__checked_read_raw, void, "\x48\x89\x5C\x24\x00\x48\x89\x6C\x24\x00\x48\x89\x74\x24\x00\x57\x48\x81\xEC\x00\x00\x00\x00\x49\x8B\xF0\x48\x8B\xEA", "xxxx?xxxx?xxxx?xxxx????xxxxxx", 0, char* out, unsigned long long len);
 
 // clang-format on
